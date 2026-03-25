@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Universal Fab - Prototype 10 (Portfolio Aesthetic)</title>
+    <link rel="stylesheet" href="base.css">
+    <style>
+        body { background-color: #f7f7f7; padding: 0; }
+        .page { background: #fff; color: #111; border-bottom: 1px solid #000; overflow: hidden; position: relative; }
+        .portfolio-grid { display: grid; grid-template-columns: repeat(12, 1fr); height: 100%; width: 100%; padding: 40px; gap: 40px; }
+        .full-img { grid-column: 1/13; height: 100%; width: 100%; object-fit: cover; }
+        .caption-box { position: absolute; bottom: 80px; left: 80px; background: rgba(255,255,255,0.9); padding: 40px; max-width: 400px; border-left: 5px solid #000; z-index: 30; }
+        .folio-title { font-size: 150px; font-weight: 200; letter-spacing: -15px; grid-column: 1/13; text-align: center; margin-top: 100px; }
+    </style>
+</head>
+<body>
+
+    <!-- PAGE 01: COVER -->
+    <section class="page" id="p10-1">
+        <div class="portfolio-grid">
+            <h1 class="folio-title" style="align-self: flex-start;">F A B</h1>
+            <div style="grid-column: 1/13; text-align: center; align-self: flex-end; padding-bottom: 100px;">
+                 <h2 style="font-weight: 200; font-size: 24px; text-transform: uppercase; letter-spacing: 10px;">Universal</h2>
+                 <p class="sub-label">Collection Ten / 2026</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- PAGE 02: STORY -->
+    <section class="page" id="p10-2">
+         <div class="image-container" style="height: 100%; width: 100%;">
+            <img src="../studio-onto.com/img/floral.jpg" alt="Floral" class="lut-night">
+         </div>
+         <div class="caption-box">
+            <h1 style="font-family: var(--title-font); font-style: italic; font-size: 30px;">The Dream.</h1>
+            <p style="margin-top: 20px;">Forging sovereignty from a childhood vision. Dakar, Senegal.</p>
+         </div>
+    </section>
+
+    <!-- PAGE 03: JALONS -->
+    <section class="page" id="p10-3">
+        <div class="portfolio-grid" style="grid-template-rows: 1fr 1fr;">
+             <div class="image-container" style="grid-column: 1/13;">
+                <img src="../studio-onto.com/img/microsoft.jpg" alt="R&D" class="lut-night">
+             </div>
+             <div style="grid-column: 1/7; align-self: center;">
+                <h1 style="font-size: 40px;">2024—2025</h1>
+                <p>15 years research. 6 verified prototypes.</p>
+             </div>
+        </div>
+    </section>
+
+    <!-- PAGE 04: VISION -->
+    <section class="page" id="p10-4">
+        <div class="image-container" style="height: 100%; width: 100%;">
+            <img src="../studio-onto.com/img/vault.jpg" alt="Vision" class="lut-night" style="filter: brightness(0.5);">
+        </div>
+        <h1 style="position: absolute; top:50%; left:50%; transform: translate(-50%, -50%); color: #fff; font-size: 150px; font-weight: 800; letter-spacing: -20px;">VISION</h1>
+    </section>
+
+    <!-- PAGE 05: RESTOS -->
+    <section class="page" id="p10-5">
+        <div class="portfolio-grid">
+             <div style="grid-column: 1/5; align-self: center;">
+                <h1 style="font-size: 50px;">The 50.</h1>
+                <p>Restaurant network.</p>
+             </div>
+             <div class="image-container" style="grid-column: 6/13;">
+                <img src="../studio-onto.com/img/vault2.jpg" alt="Resto" class="lut-night">
+             </div>
+        </div>
+    </section>
+
+    <!-- PAGE 06: INVEST -->
+    <section class="page flex-center" id="p10-6">
+        <h1 style="font-size: 400px; font-weight: 900; opacity: 0.05;">20%</h1>
+        <h2 style="font-size: 40px; position: relative; z-index: 10;">Shareholder Reward System</h2>
+    </section>
+
+    <!-- PAGE 07: HOMES -->
+    <section class="page" id="p10-7">
+        <div class="image-container" style="height: 100%; width: 100%;">
+            <img src="../studio-onto.com/img/floral4.jpg" alt="Home" class="lut-night">
+        </div>
+        <div class="caption-box" style="left: auto; right: 80px;">
+            <h1>Mobile Habitat</h1>
+        </div>
+    </section>
+
+    <!-- PAGE 08: MANGUES -->
+    <section class="page flex-center" id="p10-8">
+        <div style="text-align: center;">
+             <h1 style="font-size: 120px; font-weight: 800;">80,000 T.</h1>
+             <p>Conservation Core</p>
+        </div>
+    </section>
+
+    <!-- PAGE 09: TRACTEURS -->
+    <section class="page" id="p10-9">
+        <div class="portfolio-grid">
+             <div class="image-container" style="grid-column: 1/13;">
+                <img src="../studio-onto.com/img/microsoft3.jpg" alt="Agri" class="lut-night">
+             </div>
+        </div>
+        <h1 style="position: absolute; bottom: 80px; left: 80px; color: #fff; text-shadow: 0 5px 20px #000;">Tracteur Souverain</h1>
+    </section>
+
+    <!-- PAGE 10: BACK -->
+    <section class="page flex-center">
+        <h1 style="font-size: 30px;">Universal Fab / P10 / End</h1>
+    </section>
+
+</body>
+</html>

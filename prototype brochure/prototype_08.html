@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Universal Fab - Prototype 08 (Modernist Serif)</title>
+    <link rel="stylesheet" href="base.css">
+    <style>
+        body { background-color: #fff; padding: 0; }
+        .page { background: #fff; color: #0E1A2C; border-bottom: 5px solid #0E1A2C; overflow: hidden; position: relative; }
+        .hero-title { font-family: var(--title-font); font-size: 160px; font-weight: 300; font-style: italic; line-height: 0.7; letter-spacing: -8px; }
+        .modern-pane { display: grid; grid-template-columns: 1fr 1fr; height: 100%; }
+        .overlap-box { position: absolute; top: 100px; right: 100px; background: #0E1A2C; color: #fff; padding: 60px; width: 400px; z-index: 20; }
+    </style>
+</head>
+<body>
+
+    <!-- PAGE 01: COVER -->
+    <section class="page" id="p8-1">
+        <div style="padding: 100px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+             <h1 class="hero-title">Universal<br>&nbsp;&nbsp;&nbsp;&nbsp;Fab.</h1>
+             <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <span class="sub-label">Sovereignty Collection</span>
+                <p style="max-width: 300px; font-size: 14px;">Designed for the future of West African industrialism. 2026 Edition.</p>
+             </div>
+        </div>
+    </section>
+
+    <!-- PAGE 02: STORY -->
+    <section class="page" id="p8-2">
+        <div class="modern-pane">
+            <div class="image-container" style="clip-path: polygon(0 0, 100% 0, 80% 100%, 0% 100%);">
+                <img src="../studio-onto.com/img/floral.jpg" alt="Floral" class="lut-night">
+            </div>
+            <div style="padding: 100px; display: flex; flex-direction: column; justify-content: center;">
+                <h2 style="font-family: var(--title-font); font-size: 60px; font-style: italic;">The dream of steel.</h2>
+                <p style="margin-top: 40px; font-size: 18px; line-height: 2;">De l'enfant forgeron à l'industriel visionnaire. Un parcours de 15 ans pour briser les chaînes de l'importation.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- PAGE 03: JALONS -->
+    <section class="page" id="p8-3">
+        <div style="padding: 100px;">
+            <div style="border-bottom: 2px solid #0E1A2C; padding-bottom: 40px; margin-bottom: 40px;">
+                <h1 style="font-family: var(--title-font); font-size: 40px;">Fifteen years of silent research.</h1>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 40px;">
+                <div><h3 class="sub-label">2024</h3><p>First mobile unit launch.</p></div>
+                <div><h3 class="sub-label">2025</h3><p>Verification of 6 prototypes.</p></div>
+                <div class="image-container" style="height: 200px;"><img src="../studio-onto.com/img/microsoft.jpg" class="lut-night"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PAGE 04: VISION -->
+    <section class="page flex-center" id="p8-4">
+        <h1 class="hero-title" style="transform: rotate(-5deg); opacity: 0.1; position: absolute;">STRATEGY</h1>
+        <div class="image-container" style="width: 70%; height: 70%; border: 20px solid #fff; box-shadow: 0 50px 100px rgba(0,0,0,0.2);">
+            <img src="../studio-onto.com/img/vault.jpg" alt="Vault" class="lut-night">
+        </div>
+    </section>
+
+    <!-- PAGE 05: RESTOS -->
+    <section class="page" id="p8-5">
+        <div class="modern-pane">
+            <div style="padding: 100px; display: flex; flex-direction: column; justify-content: center;">
+                 <h1 class="hero-title" style="font-size: 80px;">The 50.</h1>
+                 <p style="margin-top: 40px;">Deploying a national network of high-efficiency mobile restaurants.</p>
+            </div>
+            <div class="image-container">
+                 <img src="../studio-onto.com/img/vault2.jpg" alt="Resto" class="lut-night">
+            </div>
+        </div>
+    </section>
+
+    <!-- PAGE 06: INVEST -->
+    <section class="page flex-center" style="background: #0E1A2C; color: #fff;">
+        <h1 style="font-size: 250px; font-family: var(--title-font); font-weight: 800; font-style: italic;">20%</h1>
+        <div class="overlap-box" style="background: #fff; color: #0E1A2C; top: auto; bottom: 100px;">
+             <p>Return on Adventure / Shareholder yield through managed distribution.</p>
+        </div>
+    </section>
+
+    <!-- PAGE 07: HOMES -->
+    <section class="page" id="p8-7">
+        <div style="padding: 80px;">
+             <h1 class="hero-title" style="font-size: 100px;">Modular<br>Habitat.</h1>
+             <div class="image-container" style="height: 400px; margin-top: 40px;">
+                <img src="../studio-onto.com/img/floral4.jpg" alt="Home" class="lut-night">
+             </div>
+        </div>
+    </section>
+
+    <!-- PAGE 08: MANGUES -->
+    <section class="page flex-center" id="p8-8">
+        <div style="text-align: center;">
+             <h1 style="font-family: var(--title-font); font-size: 120px;">80,000 T.</h1>
+             <p class="sub-label">Conservation Rooms engaged</p>
+        </div>
+    </section>
+
+    <!-- PAGE 09: TRACTEURS -->
+    <section class="page" id="p8-9">
+        <div class="modern-pane">
+            <div class="image-container">
+                <img src="../studio-onto.com/img/microsoft3.jpg" alt="Agri" class="lut-night">
+            </div>
+            <div style="padding: 100px; background: #fafafa;">
+                <h1 class="hero-title" style="font-size: 60px;">Forge<br>Patriote.</h1>
+            </div>
+        </div>
+    </section>
+
+    <!-- PAGE 10: BACK -->
+    <section class="page flex-center">
+        <h1 class="hero-title" style="font-size: 30px;">Universal Fab / P08</h1>
+    </section>
+
+</body>
+</html>
