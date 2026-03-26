@@ -52,7 +52,18 @@ export default async function handler(req, res) {
       }),
     });
 
-    const nabooData = await nabooRes.json();
+    const nabooText = await nabooRes.text();
+    let nabooData;
+    
+    try {
+      nabooData = JSON.parse(nabooText);
+    } catch (parseErr) {
+      console.error('Naboopay returned non-JSON:', nabooText);
+      return res.status(502).json({ 
+        error: 'Naboopay n\'a pas renvoyé de JSON valide.',
+        detail: nabooText.substring(0, 200) 
+      });
+    }
 
     if (!nabooRes.ok) {
       console.error('Naboopay error:', nabooData);
