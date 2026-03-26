@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Espace Actionnaire — Universal Fab</title>
+<link rel="icon" href="favicon.ico">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #090E1A;
+    --bg2: #0E1624;
+    --surface: rgba(255,255,255,0.04);
+    --surface-hover: rgba(255,255,255,0.08);
+    --border: rgba(255,255,255,0.08);
+    --accent: #3D8BFF;
+    --accent2: #7B5EFF;
+    --gold: #F5B731;
+    --success: #22C97A;
+    --danger: #FF5B5B;
+    --text: #E8EDF8;
+    --muted: rgba(232,237,248,0.45);
+    --font: 'Inter', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── NOISE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ─── AUTH SCREEN ─── */
+  #auth-screen {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10;
+    background: radial-gradient(ellipse at 50% 0%, rgba(61,139,255,0.15) 0%, var(--bg) 70%);
+  }
+  .auth-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 48px 44px;
+    width: 100%; max-width: 420px;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+    position: relative;
+    overflow: hidden;
+  }
+  .auth-card::before {
+    content: '';
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 200px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+  .auth-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 18px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; margin-bottom: 36px;
+  }
+  .auth-logo .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
+  .auth-title { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+  .auth-sub { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .form-group input {
+    width: 100%; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 16px; color: var(--text); font-size: 15px; font-family: var(--font);
+    outline: none; transition: border-color 0.2s;
+  }
+  .form-group input:focus { border-color: var(--accent); }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 14px 24px; border-radius: 12px; border: none;
+    font-family: var(--font); font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; width: 100%; margin-top: 8px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(61,139,255,0.35); }
+  .btn-ghost { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--surface-hover); }
+  .btn-gold { background: linear-gradient(135deg, #F5B731, #E8853D); color: #000; font-weight: 700; }
+  .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(245,183,49,0.35); }
+  .auth-switch { text-align: center; margin-top: 20px; font-size: 14px; color: var(--muted); }
+  .auth-switch a { color: var(--accent); cursor: pointer; text-decoration: none; }
+  .auth-error { color: var(--danger); font-size: 13px; margin-top: 8px; min-height: 20px; }
+
+  /* ─── MAIN DASHBOARD ─── */
+  #dashboard { display: none; min-height: 100vh; }
+
+  /* Navigation */
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 32px;
+    background: rgba(9,14,26,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { font-size: 16px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; }
+  .nav-logo span { color: var(--accent); }
+  .nav-right { display: flex; align-items: center; gap: 16px; }
+  .nav-user { font-size: 13px; color: var(--muted); }
+  .btn-sm { padding: 8px 16px; border-radius: 8px; font-size: 13px; width: auto; margin-top: 0; }
+
+  /* Hero stats */
+  .hero {
+    background: linear-gradient(180deg, rgba(61,139,255,0.08) 0%, transparent 60%);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 32px 40px;
+  }
+  .hero-label { font-size: 11px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 24px; }
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; max-width: 1000px; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px;
+    position: relative; overflow: hidden;
+    transition: background 0.2s;
+  }
+  .stat-card::after {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(61,139,255,0.3), transparent);
+  }
+  .stat-label { font-size: 12px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .stat-value { font-size: 32px; font-weight: 800; line-height: 1; }
+  .stat-value.gold { color: var(--gold); }
+  .stat-value.blue { color: var(--accent); }
+  .stat-sub { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+  /* Main Content Layout */
+  .main { max-width: 1100px; margin: 0 auto; padding: 40px 32px; display: grid; gap: 32px; }
+
+  /* Section titles */
+  .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .section-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .icon-gold { background: rgba(245,183,49,0.15); }
+  .icon-blue { background: rgba(61,139,255,0.15); }
+  .icon-purple { background: rgba(123,94,255,0.15); }
+  .icon-green { background: rgba(34,201,122,0.15); }
+  .section-title { font-size: 18px; font-weight: 700; }
+
+  /* Perks */
+  .perks-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .perk-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 20px 24px;
+    display: flex; gap: 16px; align-items: flex-start;
+    opacity: 0.4; transition: all 0.3s;
+    position: relative; overflow: hidden;
+  }
+  .perk-card.unlocked { opacity: 1; border-color: rgba(245,183,49,0.3); }
+  .perk-card.unlocked::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(245,183,49,0.06) 0%, transparent 60%);
+  }
+  .perk-icon { font-size: 28px; flex-shrink: 0; }
+  .perk-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .perk-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .perk-badge {
+    display: inline-block; margin-top: 8px;
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    padding: 3px 8px; border-radius: 20px; text-transform: uppercase;
+  }
+  .badge-locked { background: rgba(255,255,255,0.08); color: var(--muted); }
+  .badge-unlocked { background: rgba(245,183,49,0.2); color: var(--gold); }
+
+  /* Projects grid */
+  .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+  .project-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; overflow: hidden; transition: all 0.3s;
+  }
+  .project-card:hover { border-color: rgba(61,139,255,0.4); transform: translateY(-2px); }
+  .project-img {
+    height: 160px; background: linear-gradient(135deg, #0E1624 0%, #1a2744 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px; position: relative; overflow: hidden;
+  }
+  .project-img::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, transparent 40%, var(--surface) 100%);
+  }
+  .project-badge {
+    position: absolute; top: 12px; right: 12px; z-index: 1;
+    font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px;
+    background: rgba(34,201,122,0.2); color: var(--success); border: 1px solid rgba(34,201,122,0.3);
+  }
+  .project-body { padding: 24px; }
+  .project-name { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .project-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
+  .project-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .project-stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .project-stat-val { font-size: 18px; font-weight: 700; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 4px; margin-bottom: 20px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; transition: width 0.5s ease; }
+  .invest-row { display: flex; gap: 10px; align-items: center; }
+  .invest-input-wrap { flex: 1; position: relative; }
+  .invest-input {
+    width: 100%; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 55px 12px 14px;
+    color: var(--text); font-size: 14px; font-family: var(--font); outline: none;
+    transition: border-color 0.2s;
+  }
+  .invest-input:focus { border-color: var(--accent); }
+  .invest-currency { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--muted); }
+
+  /* Divident section */
+  .dividends-layout { display: grid; grid-template-columns: 1fr 1.5fr; gap: 24px; }
+  @media (max-width: 700px) { .dividends-layout { grid-template-columns: 1fr; } }
+  .withdraw-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 28px;
+  }
+  .balance-display { text-align: center; margin-bottom: 28px; }
+  .balance-amount { font-size: 42px; font-weight: 800; color: var(--gold); }
+  .balance-label { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .operator-select {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px;
+  }
+  .op-btn {
+    padding: 10px 8px; border: 1px solid var(--border); border-radius: 10px;
+    background: var(--surface); color: var(--muted); font-size: 12px; font-weight: 600;
+    cursor: pointer; text-align: center; transition: all 0.2s;
+  }
+  .op-btn.active { border-color: var(--accent); background: rgba(61,139,255,0.1); color: var(--text); }
+
+  /* History table */
+  .history-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; overflow: hidden;
+  }
+  .history-header { padding: 20px 24px; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 600; }
+  .history-table { width: 100%; border-collapse: collapse; }
+  .history-table th {
+    font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 1px; text-align: left; padding: 12px 24px; border-bottom: 1px solid var(--border);
+  }
+  .history-table td { padding: 14px 24px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .history-table tr:last-child td { border-bottom: none; }
+  .status-pill {
+    font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px;
+  }
+  .pill-paid { background: rgba(34,201,122,0.15); color: var(--success); }
+  .pill-pending { background: rgba(245,183,49,0.15); color: var(--gold); }
+  .history-empty { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 14px; }
+
+  /* Toast notifications */
+  #toast {
+    position: fixed; bottom: 32px; right: 32px; z-index: 9999;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .toast-msg {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 20px;
+    font-size: 14px; animation: slideIn 0.3s ease;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    max-width: 320px;
+  }
+  .toast-msg.success { border-color: rgba(34,201,122,0.4); color: var(--success); }
+  .toast-msg.error { border-color: rgba(255,91,91,0.4); color: var(--danger); }
+  @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } }
+
+  /* Loading spinner */
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* My investments mini list */
+  .my-investments { display: flex; flex-direction: column; gap: 10px; }
+  .my-inv-row {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 18px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .my-inv-name { font-size: 14px; font-weight: 600; }
+  .my-inv-detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .my-inv-shares { font-size: 20px; font-weight: 800; color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- ─── AUTH SCREEN ─── -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo"><div class="dot"></div>UNIVERSAL FAB</div>
+
+    <!-- Login Form -->
+    <div id="login-form">
+      <h1 class="auth-title">Espace Actionnaire</h1>
+      <p class="auth-sub">Connectez-vous pour accéder à votre portefeuille.</p>
+      <div class="form-group">
+        <label>Adresse e-mail</label>
+        <input type="email" id="login-email" placeholder="vous@example.com">
+      </div>
+      <div class="form-group">
+        <label>Mot de passe</label>
+        <input type="password" id="login-password" placeholder="••••••••">
+      </div>
+      <div class="auth-error" id="login-error"></div>
+      <button class="btn btn-primary" onclick="doLogin()">Connexion</button>
+      <p class="auth-switch">Pas encore actionnaire ? <a onclick="toggleAuth()">Créer un compte</a></p>
+    </div>
+
+    <!-- Register Form -->
+    <div id="register-form" style="display:none">
+      <h1 class="auth-title">Rejoindre l'aventure</h1>
+      <p class="auth-sub">Créez votre compte actionnaire Universal Fab.</p>
+      <div class="form-group">
+        <label>Nom complet</label>
+        <input type="text" id="reg-name" placeholder="Prénom Nom">
+      </div>
+      <div class="form-group">
+        <label>Adresse e-mail</label>
+        <input type="email" id="reg-email" placeholder="vous@example.com">
+      </div>
+      <div class="form-group">
+        <label>Mot de passe</label>
+        <input type="password" id="reg-password" placeholder="Minimum 8 caractères">
+      </div>
+      <div class="auth-error" id="reg-error"></div>
+      <button class="btn btn-primary" onclick="doRegister()">Créer mon compte</button>
+      <p class="auth-switch">Déjà actionnaire ? <a onclick="toggleAuth()">Se connecter</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ─── DASHBOARD ─── -->
+<div id="dashboard">
+
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-logo">UNIVERSAL <span>FAB</span></div>
+    <div class="nav-right">
+      <span class="nav-user" id="nav-email"></span>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Déconnexion</button>
+    </div>
+  </nav>
+
+  <!-- Hero Stats -->
+  <div class="hero">
+    <p class="hero-label">Mon Portefeuille</p>
+    <div class="stats-row">
+      <div class="stat-card">
+        <p class="stat-label">Actions Totales</p>
+        <div class="stat-value blue" id="stat-shares">—</div>
+        <p class="stat-sub">Réparties sur vos projets</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Capital Investi</p>
+        <div class="stat-value" id="stat-invested">—</div>
+        <p class="stat-sub">En francs CFA (XOF)</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Dividendes Disponibles</p>
+        <div class="stat-value gold" id="stat-dividends">—</div>
+        <p class="stat-sub">Retirables maintenant</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- ─── AVANTAGES ACTIONNAIRES ─── -->
+    <section>
+      <div class="section-header">
+        <div class="section-icon icon-gold">⭐</div>
+        <h2 class="section-title">Vos Avantages Actionnaires</h2>
+      </div>
+      <div class="perks-grid">
+        <div class="perk-card unlocked" id="perk-1">
+          <div class="perk-icon">📊</div>
+          <div>
+            <div class="perk-name">Accès aux Rapports</div>
+            <div class="perk-desc">Consultez les rapports financiers trimestriels et les résultats de chaque projet.</div>
+            <span class="perk-badge badge-unlocked">✓ Débloqué</span>
+          </div>
+        </div>
+        <div class="perk-card" id="perk-2">
+          <div class="perk-icon">🍽️</div>
+          <div>
+            <div class="perk-name">Priorité Restaurant Mobile</div>
+            <div class="perk-desc">Accédez en priorité à un restaurant mobile si la demande est forte.</div>
+            <span class="perk-badge badge-locked" id="perk-2-badge">🔒 Dès 50 actions</span>
+          </div>
+        </div>
+        <div class="perk-card" id="perk-3">
+          <div class="perk-icon">🏠</div>
+          <div>
+            <div class="perk-name">Crédit Mobile Home</div>
+            <div class="perk-desc">Obtenez un Mobile Home à crédit, payable par mensualités confortables.</div>
+            <span class="perk-badge badge-locked" id="perk-3-badge">🔒 Dès 100 actions</span>
+          </div>
+        </div>
+        <div class="perk-card" id="perk-4">
+          <div class="perk-icon">🤝</div>
+          <div>
+            <div class="perk-name">Siège au Conseil</div>
+            <div class="perk-desc">Participez aux décisions stratégiques majeures d'Universal Fab.</div>
+            <span class="perk-badge badge-locked" id="perk-4-badge">🔒 Dès 500 actions</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── MES INVESTISSEMENTS ─── -->
+    <section id="my-investments-section" style="display:none">
+      <div class="section-header">
+        <div class="section-icon icon-blue">📈</div>
+        <h2 class="section-title">Mes Investissements</h2>
+      </div>
+      <div class="my-investments" id="my-investments-list"></div>
+    </section>
+
+    <!-- ─── PROJETS D'INVESTISSEMENT ─── -->
+    <section>
+      <div class="section-header">
+        <div class="section-icon icon-purple">🚀</div>
+        <h2 class="section-title">Projets d'Investissement</h2>
+      </div>
+      <div class="projects-grid" id="projects-grid">
+        <!-- Injected by JS -->
+        <div style="text-align:center; color:var(--muted); padding:40px; grid-column:1/-1">
+          <div class="spinner"></div>
+          <p style="margin-top:12px; font-size:14px">Chargement des projets…</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── DIVIDENDES & HISTORIQUE ─── -->
+    <section>
+      <div class="section-header">
+        <div class="section-icon icon-green">💸</div>
+        <h2 class="section-title">Dividendes & Retraits</h2>
+      </div>
+      <div class="dividends-layout">
+
+        <!-- Withdraw Form -->
+        <div class="withdraw-card">
+          <div class="balance-display">
+            <div class="balance-amount" id="withdraw-balance">0 FCFA</div>
+            <div class="balance-label">Disponible pour retrait</div>
+          </div>
+          <div class="form-group">
+            <label>Opérateur</label>
+            <div class="operator-select">
+              <div class="op-btn active" data-op="WAVE" onclick="selectOp(this)">🌊 Wave</div>
+              <div class="op-btn" data-op="ORANGE_MONEY" onclick="selectOp(this)">🟠 Orange</div>
+              <div class="op-btn" data-op="FREE_MONEY" onclick="selectOp(this)">🟡 Free</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Numéro de téléphone</label>
+            <input type="tel" id="phone-number" placeholder="+221 77 000 00 00">
+          </div>
+          <div class="form-group">
+            <label>Montant à retirer (FCFA)</label>
+            <div class="invest-input-wrap">
+              <input type="number" class="invest-input" id="withdraw-amount" placeholder="5000" min="1000">
+              <span class="invest-currency">FCFA</span>
+            </div>
+          </div>
+          <div class="auth-error" id="withdraw-error"></div>
+          <button class="btn btn-gold" onclick="doWithdraw()">Retirer mes Dividendes</button>
+        </div>
+
+        <!-- History Table -->
+        <div class="history-card">
+          <div class="history-header">Historique des Retraits</div>
+          <div id="payout-history-wrap">
+            <div class="history-empty">Aucun retrait effectué pour le moment.</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </div><!-- /.main -->
+</div><!-- /#dashboard -->
+
+<!-- Toast notifications -->
+<div id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────
+// CONFIGURATION
+// ─────────────────────────────────────────────
+const SUPABASE_URL  = 'https://exkofskxjvcuclyozlho.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_zWiaMU_WeuAbLjr1cHcgDg_wr79HXzE';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// Projects data (can later be loaded from DB)
+const PROJECTS = [
+  {
+    id: 'restaurant-50',
+    name: '50 Restaurants Mobiles',
+    description: 'Déploiement stratégique de 50 restaurants mobiles solaires devant les universités, marchés et zones à fort trafic au Sénégal.',
+    emoji: '🍽️',
+    price_per_share: 10000,
+    min_shares: 5,
+    target_shares: 500,
+    sold_shares: 0,
+    status: 'En cours',
+    roi: '20% / an estimé',
+  }
+];
+
+// ─── State ───
+let currentUser   = null;
+let currentProfile = { total_shares_count: 0, total_invested: 0, dividends_balance: 0 };
+let selectedOperator = 'WAVE';
+
+// ─── INIT ───
+window.addEventListener('DOMContentLoaded', async () => {
+  const { data: { session } } = await db.auth.getSession();
+  if (session?.user) {
+    currentUser = session.user;
+    await enterDashboard();
+  }
+
+  db.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session?.user) {
+      currentUser = session.user;
+      await enterDashboard();
+    }
+    if (event === 'SIGNED_OUT') {
+      currentUser = null;
+      document.getElementById('auth-screen').style.display = 'flex';
+      document.getElementById('dashboard').style.display = 'none';
+    }
+  });
+
+  // Check URL params for payment return
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('payment') === 'success') {
+    toast('Paiement reçu ! Vos actions seront attribuées dans quelques instants.', 'success');
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+  if (params.get('payment') === 'error') {
+    toast('Le paiement a été annulé ou a échoué.', 'error');
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+});
+
+// ─── AUTH ───
+function toggleAuth() {
+  const l = document.getElementById('login-form');
+  const r = document.getElementById('register-form');
+  l.style.display = l.style.display === 'none' ? 'block' : 'none';
+  r.style.display = r.style.display === 'none' ? 'block' : 'none';
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-password').value;
+  document.getElementById('login-error').textContent = '';
+  if (!email || !pass) return document.getElementById('login-error').textContent = 'Remplissez tous les champs.';
+
+  const { error } = await db.auth.signInWithPassword({ email, password: pass });
+  if (error) document.getElementById('login-error').textContent = error.message;
+}
+
+async function doRegister() {
+  const name  = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass  = document.getElementById('reg-password').value;
+  document.getElementById('reg-error').textContent = '';
+  if (!name || !email || !pass) return document.getElementById('reg-error').textContent = 'Remplissez tous les champs.';
+  if (pass.length < 8) return document.getElementById('reg-error').textContent = 'Mot de passe minimum 8 caractères.';
+
+  const { data, error } = await db.auth.signUp({ email, password: pass, options: { data: { full_name: name } } });
+  if (error) { document.getElementById('reg-error').textContent = error.message; return; }
+  
+  // Create initial profile
+  await db.from('profiles').upsert({
+    id: data.user.id, email, full_name: name,
+    total_shares_count: 0, total_invested: 0, dividends_balance: 0,
+  });
+  toast('Compte créé ! Vérifiez votre e-mail avant de vous connecter.', 'success');
+}
+
+async function doLogout() {
+  await db.auth.signOut();
+}
+
+// ─── DASHBOARD ───
+async function enterDashboard() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  document.getElementById('nav-email').textContent = currentUser.email;
+
+  await loadProfile();
+  renderProjects();
+  await loadMyInvestments();
+  await loadPayoutHistory();
+}
+
+async function loadProfile() {
+  const { data } = await db.from('profiles').select('*').eq('id', currentUser.id).single();
+  if (data) currentProfile = data;
+
+  const shares    = formatNum(currentProfile.total_shares_count ?? 0, 2);
+  const invested  = formatCFA(currentProfile.total_invested ?? 0);
+  const dividends = formatCFA(currentProfile.dividends_balance ?? 0);
+
+  document.getElementById('stat-shares').textContent        = shares + ' Actions';
+  document.getElementById('stat-invested').textContent      = invested;
+  document.getElementById('stat-dividends').textContent     = dividends;
+  document.getElementById('withdraw-balance').textContent   = dividends;
+
+  // Update perks unlocking
+  const total = currentProfile.total_shares_count ?? 0;
+  unlockPerk('perk-2', 'perk-2-badge', total >=  50, '✓ Débloqué', '🔒 Dès 50 actions');
+  unlockPerk('perk-3', 'perk-3-badge', total >= 100, '✓ Débloqué', '🔒 Dès 100 actions');
+  unlockPerk('perk-4', 'perk-4-badge', total >= 500, '✓ Débloqué', '🔒 Dès 500 actions');
+}
+
+function unlockPerk(cardId, badgeId, condition, yes, no) {
+  const card  = document.getElementById(cardId);
+  const badge = document.getElementById(badgeId);
+  if (condition) {
+    card.classList.add('unlocked');
+    badge.className = 'perk-badge badge-unlocked';
+    badge.textContent = yes;
+  } else {
+    card.classList.remove('unlocked');
+    badge.className = 'perk-badge badge-locked';
+    badge.textContent = no;
+  }
+}
+
+// ─── PROJECTS ───
+function renderProjects() {
+  const grid = document.getElementById('projects-grid');
+  grid.innerHTML = '';
+  PROJECTS.forEach(p => {
+    const pct = Math.min(100, ((p.sold_shares || 0) / p.target_shares) * 100).toFixed(0);
+    grid.innerHTML += `
+      <div class="project-card">
+        <div class="project-img">
+          ${p.emoji}
+          <span class="project-badge">${p.status}</span>
+        </div>
+        <div class="project-body">
+          <div class="project-name">${p.name}</div>
+          <div class="project-desc">${p.description}</div>
+          <div class="project-stats">
+            <div>
+              <div class="project-stat-label">Prix/Action</div>
+              <div class="project-stat-val">${formatCFA(p.price_per_share)}</div>
+            </div>
+            <div>
+              <div class="project-stat-label">ROI Estimé</div>
+              <div class="project-stat-val" style="color:var(--success)">${p.roi}</div>
+            </div>
+            <div>
+              <div class="project-stat-label">Min. d'Achat</div>
+              <div class="project-stat-val">${p.min_shares} Actions</div>
+            </div>
+            <div>
+              <div class="project-stat-label">Min. en FCFA</div>
+              <div class="project-stat-val">${formatCFA(p.price_per_share * p.min_shares)}</div>
+            </div>
+          </div>
+          <div class="project-stat-label" style="margin-bottom:8px">Progression — ${pct}%</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <div class="invest-row">
+            <div class="invest-input-wrap" style="flex:1">
+              <input type="number" class="invest-input" id="inv-${p.id}" 
+                placeholder="${formatNum(p.price_per_share * p.min_shares)} min."
+                min="${p.price_per_share * p.min_shares}" step="${p.price_per_share}">
+              <span class="invest-currency">FCFA</span>
+            </div>
+            <button class="btn btn-primary btn-sm" style="white-space:nowrap; min-width:120px"
+              onclick="doInvest('${p.id}', '${p.name}')">
+              Investir →
+            </button>
+          </div>
+        </div>
+      </div>`;
+  });
+}
+
+// ─── INVEST ───
+async function doInvest(projectId, projectName) {
+  if (!currentUser) return;
+  const amountInput = document.getElementById(`inv-${projectId}`);
+  const amount = parseInt(amountInput.value);
+  const project = PROJECTS.find(p => p.id === projectId);
+  const minAmount = project.price_per_share * project.min_shares;
+
+  if (!amount || isNaN(amount)) { toast('Entrez un montant à investir.', 'error'); return; }
+  if (amount < minAmount) { toast(`Montant minimum : ${formatCFA(minAmount)}`, 'error'); return; }
+
+  try {
+    const res = await fetch('/api/create-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: currentUser.id,
+        userEmail: currentUser.email,
+        projectId,
+        projectName,
+        amount,
+      }),
+    });
+    const data = await res.json();
+    if (data.checkout_url) {
+      window.location.href = data.checkout_url;
+    } else {
+      toast('Erreur lors de la création du paiement. Réessayez.', 'error');
+    }
+  } catch (e) {
+    toast('Erreur réseau. Vérifiez votre connexion.', 'error');
+  }
+}
+
+// ─── MY INVESTMENTS ───
+async function loadMyInvestments() {
+  const { data } = await db.from('investments')
+    .select('*, projects(name)')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false });
+
+  if (!data || data.length === 0) return;
+
+  // Group by project
+  const grouped = {};
+  data.forEach(inv => {
+    const key = inv.project_id;
+    if (!grouped[key]) grouped[key] = { name: inv.projects?.name || inv.project_id, shares: 0, invested: 0 };
+    grouped[key].shares   += inv.shares_count || 0;
+    grouped[key].invested += inv.amount_paid  || 0;
+  });
+
+  const section = document.getElementById('my-investments-section');
+  const list    = document.getElementById('my-investments-list');
+  section.style.display = 'block';
+  list.innerHTML = Object.entries(grouped).map(([, g]) => `
+    <div class="my-inv-row">
+      <div>
+        <div class="my-inv-name">${g.name}</div>
+        <div class="my-inv-detail">Investi : ${formatCFA(g.invested)}</div>
+      </div>
+      <div class="my-inv-shares">${formatNum(g.shares, 4)} Actions</div>
+    </div>`).join('');
+}
+
+// ─── PAYOUT HISTORY ───
+async function loadPayoutHistory() {
+  const { data } = await db.from('payouts')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false });
+
+  const wrap = document.getElementById('payout-history-wrap');
+  if (!data || data.length === 0) {
+    wrap.innerHTML = '<div class="history-empty">Aucun retrait effectué pour le moment.</div>';
+    return;
+  }
+
+  wrap.innerHTML = `<table class="history-table">
+    <thead><tr>
+      <th>Date</th><th>Montant</th><th>Operateur</th><th>Statut</th>
+    </tr></thead>
+    <tbody>${data.map(p => `<tr>
+      <td>${new Date(p.created_at).toLocaleDateString('fr-FR')}</td>
+      <td>${formatCFA(p.amount)}</td>
+      <td>${p.operator || '—'}</td>
+      <td><span class="status-pill ${p.status === 'paid' ? 'pill-paid' : 'pill-pending'}">${p.status === 'paid' ? 'Payé' : 'En cours'}</span></td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+// ─── WITHDRAW ───
+function selectOp(el) {
+  document.querySelectorAll('.op-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  selectedOperator = el.dataset.op;
+}
+
+async function doWithdraw() {
+  const phone  = document.getElementById('phone-number').value.trim();
+  const amount = parseInt(document.getElementById('withdraw-amount').value);
+  const errEl  = document.getElementById('withdraw-error');
+  errEl.textContent = '';
+
+  if (!phone)  { errEl.textContent = 'Entrez votre numéro de téléphone.'; return; }
+  if (!amount || amount < 1000) { errEl.textContent = 'Montant minimum : 1 000 FCFA.'; return; }
+  if (amount > (currentProfile.dividends_balance ?? 0)) {
+    errEl.textContent = 'Solde insuffisant.'; return;
+  }
+
+  try {
+    const res = await fetch('/api/payout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: currentUser.id, amount, phoneNumber: phone, phoneOperator: selectedOperator }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      toast('Retrait en cours de traitement ! Vous recevrez votre virement bientôt.', 'success');
+      await loadProfile();
+      await loadPayoutHistory();
+    } else {
+      errEl.textContent = data.error || 'Erreur lors du retrait.';
+    }
+  } catch (e) {
+    errEl.textContent = 'Erreur réseau.';
+  }
+}
+
+// ─── HELPERS ───
+function formatCFA(n) {
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', minimumFractionDigits: 0 }).format(n);
+}
+function formatNum(n, dec = 0) {
+  return parseFloat(n).toFixed(dec).replace(/\.?0+$/, '');
+}
+function toast(msg, type = 'success') {
+  const el = document.createElement('div');
+  el.className = `toast-msg ${type}`;
+  el.textContent = msg;
+  document.getElementById('toast').appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+</script>
+</body>
+</html>

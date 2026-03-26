@@ -23,8 +23,8 @@ desktop.ini
 *.sw?
 
 # Build Output
-dist/
-build/
+# dist/ is commented out so git pushes the assets to Vercel!
+# build/
 .next/
 out/
 .nuxt/
