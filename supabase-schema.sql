@@ -51,7 +51,13 @@ values (
   10000,
   10000,
   'Dividendes'
-) on conflict (id) do nothing;
+) on conflict (id) do update set 
+  name = excluded.name,
+  description = excluded.description,
+  price_per_share = excluded.price_per_share,
+  min_amount_cfa = excluded.min_amount_cfa,
+  target_shares = excluded.target_shares,
+  roi_label = excluded.roi_label;
 
 -- 3. Investissements (un enregistrement par paiement Naboopay reçu)
 create table if not exists public.investments (
