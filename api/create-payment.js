@@ -21,6 +21,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    const numAmount = Number(amount);
+
     // Call Naboopay API to create a payment transaction
     const nabooRes = await fetch('https://api.naboopay.com/api/v1/transaction/create-transaction', {
       method: 'POST',
@@ -29,16 +31,15 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${NABOO_API_KEY}`,
       },
       body: JSON.stringify({
-        amount: amount,
+        amount: numAmount,
         currency: 'XOF',
         description: `Investissement Universal Fab — ${projectName}`,
         method_of_payment: ['WAVE', 'ORANGE_MONEY', 'FREE_MONEY'],
         is_merchant: true,
         is_escrow: false,
-        products: [{ name: projectName, quantity: 1, amount: amount }],
+        products: [{ name: projectName, quantity: 1, amount: numAmount, category: 'digital' }],
         success_url: `${APP_URL}/espace-actionnaire.html?payment=success&project=${projectId}`,
         error_url: `${APP_URL}/espace-actionnaire.html?payment=error`,
-        // Metadata to track which user / project this payment belongs to
         metadata: {
           user_id: userId,
           user_email: userEmail,
@@ -48,21 +49,28 @@ export default async function handler(req, res) {
       }),
     });
 
-    const nabooData = await nabooRes.json();
+    const nabooData = await nabooRes.json().catch(() => ({}));
 
     if (!nabooRes.ok) {
-      console.error('Naboopay error:', nabooData);
-      return res.status(500).json({ error: 'Naboopay API error', detail: nabooData });
+      console.error('Naboopay API Error Response:', nabooData);
+      return res.status(500).json({ 
+        error: 'Naboopay API error', 
+        detail: nabooData || 'No response from Naboopay',
+        statusCode: nabooRes.status 
+      });
     }
 
-    // Return the checkout URL for the frontend to redirect the user
     return res.status(200).json({
       checkout_url: nabooData.checkout_url || nabooData.url,
       transaction_id: nabooData.id,
     });
 
   } catch (err) {
-    console.error('Server error:', err);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error('Fatal Server Error:', err);
+    return res.status(500).json({ 
+      error: 'Internal server error', 
+      message: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
   }
 }

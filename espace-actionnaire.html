@@ -739,7 +739,7 @@ async function doInvest(projectId, projectName) {
     if (data.checkout_url) {
       window.location.href = data.checkout_url;
     } else {
-      toast('Erreur lors de la création du paiement. Réessayez.', 'error');
+      toast(data.error + (data.detail ? ': ' + JSON.stringify(data.detail) : ''), 'error');
     }
   } catch (e) {
     toast('Erreur réseau. Vérifiez votre connexion.', 'error');
