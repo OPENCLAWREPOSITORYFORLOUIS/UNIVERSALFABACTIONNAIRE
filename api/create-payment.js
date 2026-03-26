@@ -49,20 +49,26 @@ export default async function handler(req, res) {
       }),
     });
 
-    const nabooData = await nabooRes.json().catch(() => ({}));
+    const responseText = await nabooRes.text();
+    let nabooData = {};
+    try {
+      nabooData = JSON.parse(responseText);
+    } catch (e) {
+      nabooData = { rawResponse: responseText };
+    }
 
     if (!nabooRes.ok) {
-      console.error('Naboopay API Error Response:', nabooData);
+      console.error('Naboopay API Error:', nabooRes.status, responseText);
       return res.status(500).json({ 
-        error: 'Naboopay API error', 
-        detail: nabooData || 'No response from Naboopay',
-        statusCode: nabooRes.status 
+        error: 'Naboopay API status ' + nabooRes.status, 
+        detail: nabooData,
+        message: 'Consultez les logs Vercel pour plus de détails.'
       });
     }
 
     return res.status(200).json({
-      checkout_url: nabooData.checkout_url || nabooData.url,
-      transaction_id: nabooData.id,
+      checkout_url: nabooData.checkout_url || nabooData.url || nabooData.checkoutUrl,
+      order_id: nabooData.order_id || nabooData.id,
     });
 
   } catch (err) {
