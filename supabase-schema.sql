@@ -30,6 +30,9 @@ create table if not exists public.projects (
   created_at       timestamptz default now()
 );
 
+-- Ajouter la nouvelle colonne si la table existait déjà
+alter table public.projects add column if not exists min_amount_cfa numeric default 100;
+
 -- Insert des projets initiaux
 insert into public.projects (id, name, description, emoji, price_per_share, min_amount_cfa, target_shares, roi_label)
 values (
@@ -90,18 +93,22 @@ alter table public.payouts     enable row level security;
 alter table public.projects    enable row level security;
 
 -- Profil : lire/écrire le sien uniquement
+drop policy if exists "profiles: own" on public.profiles;
 create policy "profiles: own" on public.profiles
   using (auth.uid() = id) with check (auth.uid() = id);
 
 -- Investissements : voir les siens uniquement
+drop policy if exists "investments: own" on public.investments;
 create policy "investments: own" on public.investments
   using (auth.uid() = user_id);
 
 -- Retraits : voir les siens uniquement
+drop policy if exists "payouts: own" on public.payouts;
 create policy "payouts: own" on public.payouts
   using (auth.uid() = user_id);
 
 -- Projets : tout le monde peut lire
+drop policy if exists "projects: read all" on public.projects;
 create policy "projects: read all" on public.projects
   for select using (true);
 
