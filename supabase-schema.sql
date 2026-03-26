@@ -22,45 +22,26 @@ create table if not exists public.projects (
   description      text,
   emoji            text default '🏭',
   price_per_share  numeric not null,
-  min_amount_cfa   numeric default 100,
+  min_shares       int default 5,
   target_shares    numeric default 1000,
   sold_shares      numeric default 0,
-  roi_label        text,
+  roi_label        text default '20% / an estimé',
   status           text default 'En cours',
   created_at       timestamptz default now()
 );
 
--- Ajouter la nouvelle colonne si la table existait déjà
-alter table public.projects add column if not exists min_amount_cfa numeric default 100;
-
--- Insert des projets initiaux
-insert into public.projects (id, name, description, emoji, price_per_share, min_amount_cfa, target_shares, roi_label)
+-- Insert du premier projet
+insert into public.projects (id, name, description, emoji, price_per_share, min_shares, target_shares, roi_label)
 values (
   'restaurant-50',
   '50 Restaurants Mobiles',
   'Déploiement stratégique de 50 restaurants mobiles solaires devant les universités, marchés et zones à fort trafic au Sénégal.',
   '🍽️',
-  2000,
-  100,
-  3000,
-  null
-),
-(
-  'universal-fab',
-  'Actions Universal Fab',
-  'Investissez directement dans le capital social d''Universal Fab et participez à toutes nos entreprises futures.',
-  '🏢',
   10000,
-  10000,
-  10000,
-  'Dividendes'
-) on conflict (id) do update set 
-  name = excluded.name,
-  description = excluded.description,
-  price_per_share = excluded.price_per_share,
-  min_amount_cfa = excluded.min_amount_cfa,
-  target_shares = excluded.target_shares,
-  roi_label = excluded.roi_label;
+  5,
+  500,
+  '20% / an estimé'
+) on conflict (id) do nothing;
 
 -- 3. Investissements (un enregistrement par paiement Naboopay reçu)
 create table if not exists public.investments (
@@ -93,22 +74,18 @@ alter table public.payouts     enable row level security;
 alter table public.projects    enable row level security;
 
 -- Profil : lire/écrire le sien uniquement
-drop policy if exists "profiles: own" on public.profiles;
 create policy "profiles: own" on public.profiles
   using (auth.uid() = id) with check (auth.uid() = id);
 
 -- Investissements : voir les siens uniquement
-drop policy if exists "investments: own" on public.investments;
 create policy "investments: own" on public.investments
   using (auth.uid() = user_id);
 
 -- Retraits : voir les siens uniquement
-drop policy if exists "payouts: own" on public.payouts;
 create policy "payouts: own" on public.payouts
   using (auth.uid() = user_id);
 
 -- Projets : tout le monde peut lire
-drop policy if exists "projects: read all" on public.projects;
 create policy "projects: read all" on public.projects
   for select using (true);
 

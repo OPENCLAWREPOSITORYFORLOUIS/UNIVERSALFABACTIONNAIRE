@@ -397,15 +397,15 @@
           <div class="perk-icon">❄️</div>
           <div>
             <div class="perk-name">Priorité Chambre Froide</div>
-            <div class="perk-desc">Accédez en priorité à l'achat ou location d'une chambre froide si la demande est forte.</div>
-            <span class="perk-badge badge-locked" id="perk-2-badge">🔒 Dès actionnaire</span>
+            <div class="perk-desc">Soyez prioritaire sur l'acquisition de chambres froides si la demande est forte.</div>
+            <span class="perk-badge badge-locked" id="perk-2-badge">🔒 Dès que vous êtes actionnaire</span>
           </div>
         </div>
         <div class="perk-card" id="perk-3">
-          <div class="perk-icon">🍽️</div>
+          <div class="perk-icon">🚐</div>
           <div>
-            <div class="perk-name">Crédit Équipements</div>
-            <div class="perk-desc">Obtenez un Restaurant Mobile ou une Chambre Froide à crédit, par mensualités confortables.</div>
+            <div class="perk-name">Crédit Restaurant Mobile</div>
+            <div class="perk-desc">Obtenez un Restaurant Mobile à crédit, payable par mensualités confortables.</div>
             <span class="perk-badge badge-locked" id="perk-3-badge">🔒 Dès 100 actions</span>
           </div>
         </div>
@@ -510,28 +510,28 @@ const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 // Projects data (can later be loaded from DB)
 const PROJECTS = [
   {
-    id: 'restaurant-50',
-    name: '50 Restaurants Mobiles',
-    description: 'Déploiement stratégique de 50 restaurants mobiles solaires devant les universités, marchés et zones à fort trafic au Sénégal.',
-    emoji: '🍽️',
-    price_per_share: 2000,
-    min_amount_cfa: 100,
-    target_shares: 3000,
-    sold_shares: 0,
-    status: 'En cours',
-    roi: null,
-  },
-  {
     id: 'universal-fab',
-    name: 'Actions Universal Fab',
-    description: 'Investissez directement dans le capital social d\'Universal Fab et participez à toutes nos entreprises futures.',
-    emoji: '🏢',
+    name: 'Universal Fab (Entreprise globale)',
+    description: 'Investissement et achat d\'actions dans l\'entreprise Universal Fab (maison mère).',
+    emoji: '🏭',
     price_per_share: 10000,
-    min_amount_cfa: 10000,
-    target_shares: 10000,
+    min_shares: 0.01,
+    target_shares: 5000,
     sold_shares: 0,
     status: 'Ouvert',
-    roi: 'Dividendes',
+    roi: '',
+  },
+  {
+    id: 'restaurant-50',
+    name: 'Restaurants Mobiles',
+    description: 'Déploiement stratégique de restaurants mobiles solaires au Sénégal.',
+    emoji: '🍽️',
+    price_per_share: 10000,
+    min_shares: 0.01,
+    target_shares: 500,
+    sold_shares: 0,
+    status: 'Ouvert',
+    roi: '',
   }
 ];
 
@@ -640,7 +640,7 @@ async function loadProfile() {
 
   // Update perks unlocking
   const total = currentProfile.total_shares_count ?? 0;
-  unlockPerk('perk-2', 'perk-2-badge', total >=   1, '✓ Débloqué', '🔒 Dès 1 action');
+  unlockPerk('perk-2', 'perk-2-badge', total > 0, '✓ Débloqué', '🔒 Dès que vous êtes actionnaire');
   unlockPerk('perk-3', 'perk-3-badge', total >= 100, '✓ Débloqué', '🔒 Dès 100 actions');
   unlockPerk('perk-4', 'perk-4-badge', total >= 500, '✓ Débloqué', '🔒 Dès 500 actions');
 }
@@ -679,17 +679,18 @@ function renderProjects() {
               <div class="project-stat-label">Prix/Action</div>
               <div class="project-stat-val">${formatCFA(p.price_per_share)}</div>
             </div>
-            ${p.roi ? `<div>
-              <div class="project-stat-label">ROI / Avantage</div>
+            ${p.roi ? `
+            <div>
+              <div class="project-stat-label">ROI Estimé</div>
               <div class="project-stat-val" style="color:var(--success)">${p.roi}</div>
             </div>` : ''}
             <div>
               <div class="project-stat-label">Min. d'Achat</div>
-              <div class="project-stat-val">${formatNum(p.min_amount_cfa / p.price_per_share, 2)} Actions</div>
+              <div class="project-stat-val">${p.min_shares} Actions</div>
             </div>
             <div>
               <div class="project-stat-label">Min. en FCFA</div>
-              <div class="project-stat-val">${formatCFA(p.min_amount_cfa)}</div>
+              <div class="project-stat-val">${formatCFA(p.price_per_share * p.min_shares)}</div>
             </div>
           </div>
           <div class="project-stat-label" style="margin-bottom:8px">Progression — ${pct}%</div>
@@ -697,8 +698,8 @@ function renderProjects() {
           <div class="invest-row">
             <div class="invest-input-wrap" style="flex:1">
               <input type="number" class="invest-input" id="inv-${p.id}" 
-                placeholder="${formatNum(p.min_amount_cfa)} min."
-                min="${p.min_amount_cfa}">
+                placeholder="${formatNum(p.price_per_share * p.min_shares)} min."
+                min="${p.price_per_share * p.min_shares}" step="${p.price_per_share}">
               <span class="invest-currency">FCFA</span>
             </div>
             <button class="btn btn-primary btn-sm" style="white-space:nowrap; min-width:120px"
@@ -717,7 +718,7 @@ async function doInvest(projectId, projectName) {
   const amountInput = document.getElementById(`inv-${projectId}`);
   const amount = parseInt(amountInput.value);
   const project = PROJECTS.find(p => p.id === projectId);
-  const minAmount = project.min_amount_cfa;
+  const minAmount = project.price_per_share * project.min_shares;
 
   if (!amount || isNaN(amount)) { toast('Entrez un montant à investir.', 'error'); return; }
   if (amount < minAmount) { toast(`Montant minimum : ${formatCFA(minAmount)}`, 'error'); return; }
@@ -738,8 +739,7 @@ async function doInvest(projectId, projectName) {
     if (data.checkout_url) {
       window.location.href = data.checkout_url;
     } else {
-      const detailStr = data.detail ? JSON.stringify(data.detail) : '';
-      toast(data.error || 'Erreur lors de la création du paiement: ' + detailStr, 'error');
+      toast('Erreur lors de la création du paiement. Réessayez.', 'error');
     }
   } catch (e) {
     toast('Erreur réseau. Vérifiez votre connexion.', 'error');

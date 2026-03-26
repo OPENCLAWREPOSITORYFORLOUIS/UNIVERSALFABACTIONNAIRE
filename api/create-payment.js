@@ -11,14 +11,6 @@ export default async function handler(req, res) {
 
   try {
     const { userId, userEmail, projectId, projectName, amount } = req.body;
-    
-    // Dynamically resolve APP_URL so the user's config errors won't break it
-    let baseUrl = process.env.APP_URL || req.headers.origin;
-    if (!baseUrl && req.headers.host) {
-      baseUrl = `https://${req.headers.host}`;
-    }
-    // Remove trailing slash if present
-    if (baseUrl && baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
 
     if (!NABOO_API_KEY) {
       console.error('NABOO_API_KEY is missing in env');
@@ -37,19 +29,15 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${NABOO_API_KEY}`,
       },
       body: JSON.stringify({
-        method_of_payment: ["WAVE", "ORANGE_MONEY", "FREE_MONEY"],
+        amount: amount,
         currency: 'XOF',
-        success_url: `${baseUrl}/espace-actionnaire.html?payment=success&project=${projectId}`,
-        error_url: `${baseUrl}/espace-actionnaire.html?payment=error`,
-        products: [
-          {
-            name: `Investissement — ${projectName}`,
-            category: 'Investissement',
-            amount: amount,
-            quantity: 1,
-            description: `Achat d'actions pour le projet ${projectName}`
-          }
-        ],
+        description: `Investissement Universal Fab — ${projectName}`,
+        method_of_payment: ['WAVE', 'ORANGE_MONEY', 'FREE_MONEY'],
+        is_merchant: true,
+        is_escrow: false,
+        products: [{ name: projectName, quantity: 1, amount: amount }],
+        success_url: `${APP_URL}/espace-actionnaire.html?payment=success&project=${projectId}`,
+        error_url: `${APP_URL}/espace-actionnaire.html?payment=error`,
         // Metadata to track which user / project this payment belongs to
         metadata: {
           user_id: userId,
@@ -60,26 +48,11 @@ export default async function handler(req, res) {
       }),
     });
 
-    const nabooText = await nabooRes.text();
-    let nabooData;
-    
-    try {
-      nabooData = JSON.parse(nabooText);
-    } catch (parseErr) {
-      console.error('Naboopay returned non-JSON:', nabooText);
-      return res.status(502).json({ 
-        error: 'Naboopay n\'a pas renvoyé de JSON valide.',
-        detail: nabooText.substring(0, 200) 
-      });
-    }
+    const nabooData = await nabooRes.json();
 
     if (!nabooRes.ok) {
       console.error('Naboopay error:', nabooData);
-      // Return the exact error to the frontend for easy debugging
-      return res.status(500).json({ 
-        error: 'Naboopay a rejeté la demande.', 
-        detail: nabooData 
-      });
+      return res.status(500).json({ error: 'Naboopay API error', detail: nabooData });
     }
 
     // Return the checkout URL for the frontend to redirect the user
@@ -90,6 +63,6 @@ export default async function handler(req, res) {
 
   } catch (err) {
     console.error('Server error:', err);
-    return res.status(500).json({ error: 'Internal server error', detail: err.message });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 }
