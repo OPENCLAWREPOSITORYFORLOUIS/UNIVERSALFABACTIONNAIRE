@@ -22,25 +22,35 @@ create table if not exists public.projects (
   description      text,
   emoji            text default '🏭',
   price_per_share  numeric not null,
-  min_shares       int default 5,
+  min_amount_cfa   numeric default 100,
   target_shares    numeric default 1000,
   sold_shares      numeric default 0,
-  roi_label        text default '20% / an estimé',
+  roi_label        text,
   status           text default 'En cours',
   created_at       timestamptz default now()
 );
 
--- Insert du premier projet
-insert into public.projects (id, name, description, emoji, price_per_share, min_shares, target_shares, roi_label)
+-- Insert des projets initiaux
+insert into public.projects (id, name, description, emoji, price_per_share, min_amount_cfa, target_shares, roi_label)
 values (
   'restaurant-50',
   '50 Restaurants Mobiles',
   'Déploiement stratégique de 50 restaurants mobiles solaires devant les universités, marchés et zones à fort trafic au Sénégal.',
   '🍽️',
+  2000,
+  100,
+  3000,
+  null
+),
+(
+  'universal-fab',
+  'Actions Universal Fab',
+  'Investissez directement dans le capital social d''Universal Fab et participez à toutes nos entreprises futures.',
+  '🏢',
   10000,
-  5,
-  500,
-  '20% / an estimé'
+  10000,
+  10000,
+  'Dividendes'
 ) on conflict (id) do nothing;
 
 -- 3. Investissements (un enregistrement par paiement Naboopay reçu)

@@ -394,18 +394,18 @@
           </div>
         </div>
         <div class="perk-card" id="perk-2">
-          <div class="perk-icon">🍽️</div>
+          <div class="perk-icon">❄️</div>
           <div>
-            <div class="perk-name">Priorité Restaurant Mobile</div>
-            <div class="perk-desc">Accédez en priorité à un restaurant mobile si la demande est forte.</div>
-            <span class="perk-badge badge-locked" id="perk-2-badge">🔒 Dès 50 actions</span>
+            <div class="perk-name">Priorité Chambre Froide</div>
+            <div class="perk-desc">Accédez en priorité à l'achat ou location d'une chambre froide si la demande est forte.</div>
+            <span class="perk-badge badge-locked" id="perk-2-badge">🔒 Dès actionnaire</span>
           </div>
         </div>
         <div class="perk-card" id="perk-3">
-          <div class="perk-icon">🏠</div>
+          <div class="perk-icon">🍽️</div>
           <div>
-            <div class="perk-name">Crédit Mobile Home</div>
-            <div class="perk-desc">Obtenez un Mobile Home à crédit, payable par mensualités confortables.</div>
+            <div class="perk-name">Crédit Équipements</div>
+            <div class="perk-desc">Obtenez un Restaurant Mobile ou une Chambre Froide à crédit, par mensualités confortables.</div>
             <span class="perk-badge badge-locked" id="perk-3-badge">🔒 Dès 100 actions</span>
           </div>
         </div>
@@ -514,12 +514,24 @@ const PROJECTS = [
     name: '50 Restaurants Mobiles',
     description: 'Déploiement stratégique de 50 restaurants mobiles solaires devant les universités, marchés et zones à fort trafic au Sénégal.',
     emoji: '🍽️',
-    price_per_share: 10000,
-    min_shares: 5,
-    target_shares: 500,
+    price_per_share: 2000,
+    min_amount_cfa: 100,
+    target_shares: 3000,
     sold_shares: 0,
     status: 'En cours',
-    roi: '20% / an estimé',
+    roi: null,
+  },
+  {
+    id: 'universal-fab',
+    name: 'Actions Universal Fab',
+    description: 'Investissez directement dans le capital social d\'Universal Fab et participez à toutes nos entreprises futures.',
+    emoji: '🏢',
+    price_per_share: 10000,
+    min_amount_cfa: 10000,
+    target_shares: 10000,
+    sold_shares: 0,
+    status: 'Ouvert',
+    roi: 'Dividendes',
   }
 ];
 
@@ -628,7 +640,7 @@ async function loadProfile() {
 
   // Update perks unlocking
   const total = currentProfile.total_shares_count ?? 0;
-  unlockPerk('perk-2', 'perk-2-badge', total >=  50, '✓ Débloqué', '🔒 Dès 50 actions');
+  unlockPerk('perk-2', 'perk-2-badge', total >=   1, '✓ Débloqué', '🔒 Dès 1 action');
   unlockPerk('perk-3', 'perk-3-badge', total >= 100, '✓ Débloqué', '🔒 Dès 100 actions');
   unlockPerk('perk-4', 'perk-4-badge', total >= 500, '✓ Débloqué', '🔒 Dès 500 actions');
 }
@@ -667,17 +679,17 @@ function renderProjects() {
               <div class="project-stat-label">Prix/Action</div>
               <div class="project-stat-val">${formatCFA(p.price_per_share)}</div>
             </div>
-            <div>
-              <div class="project-stat-label">ROI Estimé</div>
+            ${p.roi ? `<div>
+              <div class="project-stat-label">ROI / Avantage</div>
               <div class="project-stat-val" style="color:var(--success)">${p.roi}</div>
-            </div>
+            </div>` : ''}
             <div>
               <div class="project-stat-label">Min. d'Achat</div>
-              <div class="project-stat-val">${p.min_shares} Actions</div>
+              <div class="project-stat-val">${formatNum(p.min_amount_cfa / p.price_per_share, 2)} Actions</div>
             </div>
             <div>
               <div class="project-stat-label">Min. en FCFA</div>
-              <div class="project-stat-val">${formatCFA(p.price_per_share * p.min_shares)}</div>
+              <div class="project-stat-val">${formatCFA(p.min_amount_cfa)}</div>
             </div>
           </div>
           <div class="project-stat-label" style="margin-bottom:8px">Progression — ${pct}%</div>
@@ -685,8 +697,8 @@ function renderProjects() {
           <div class="invest-row">
             <div class="invest-input-wrap" style="flex:1">
               <input type="number" class="invest-input" id="inv-${p.id}" 
-                placeholder="${formatNum(p.price_per_share * p.min_shares)} min."
-                min="${p.price_per_share * p.min_shares}" step="${p.price_per_share}">
+                placeholder="${formatNum(p.min_amount_cfa)} min."
+                min="${p.min_amount_cfa}">
               <span class="invest-currency">FCFA</span>
             </div>
             <button class="btn btn-primary btn-sm" style="white-space:nowrap; min-width:120px"
@@ -705,7 +717,7 @@ async function doInvest(projectId, projectName) {
   const amountInput = document.getElementById(`inv-${projectId}`);
   const amount = parseInt(amountInput.value);
   const project = PROJECTS.find(p => p.id === projectId);
-  const minAmount = project.price_per_share * project.min_shares;
+  const minAmount = project.min_amount_cfa;
 
   if (!amount || isNaN(amount)) { toast('Entrez un montant à investir.', 'error'); return; }
   if (amount < minAmount) { toast(`Montant minimum : ${formatCFA(minAmount)}`, 'error'); return; }

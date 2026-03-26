@@ -11,6 +11,14 @@ export default async function handler(req, res) {
 
   try {
     const { userId, userEmail, projectId, projectName, amount } = req.body;
+    
+    // Dynamically resolve APP_URL so the user's config errors won't break it
+    let baseUrl = process.env.APP_URL || req.headers.origin;
+    if (!baseUrl && req.headers.host) {
+      baseUrl = `https://${req.headers.host}`;
+    }
+    // Remove trailing slash if present
+    if (baseUrl && baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
 
     if (!NABOO_API_KEY) {
       console.error('NABOO_API_KEY is missing in env');
@@ -32,8 +40,8 @@ export default async function handler(req, res) {
         amount: amount,
         currency: 'XOF',
         description: `Investissement Universal Fab — ${projectName}`,
-        success_url: `${APP_URL}/espace-actionnaire.html?payment=success&project=${projectId}`,
-        error_url: `${APP_URL}/espace-actionnaire.html?payment=error`,
+        success_url: `${baseUrl}/espace-actionnaire.html?payment=success&project=${projectId}`,
+        error_url: `${baseUrl}/espace-actionnaire.html?payment=error`,
         // Metadata to track which user / project this payment belongs to
         metadata: {
           user_id: userId,
@@ -48,7 +56,11 @@ export default async function handler(req, res) {
 
     if (!nabooRes.ok) {
       console.error('Naboopay error:', nabooData);
-      return res.status(500).json({ error: 'Naboopay API error', detail: nabooData });
+      // Return the exact error to the frontend for easy debugging
+      return res.status(500).json({ 
+        error: 'Naboopay a rejeté la demande.', 
+        detail: nabooData 
+      });
     }
 
     // Return the checkout URL for the frontend to redirect the user
@@ -59,6 +71,6 @@ export default async function handler(req, res) {
 
   } catch (err) {
     console.error('Server error:', err);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error', detail: err.message });
   }
 }
