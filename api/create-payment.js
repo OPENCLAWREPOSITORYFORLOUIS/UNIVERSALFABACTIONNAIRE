@@ -37,11 +37,19 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${NABOO_API_KEY}`,
       },
       body: JSON.stringify({
-        amount: amount,
+        method_of_payment: ["WAVE", "ORANGE_MONEY", "FREE_MONEY"],
         currency: 'XOF',
-        description: `Investissement Universal Fab — ${projectName}`,
         success_url: `${baseUrl}/espace-actionnaire.html?payment=success&project=${projectId}`,
         error_url: `${baseUrl}/espace-actionnaire.html?payment=error`,
+        products: [
+          {
+            name: `Investissement — ${projectName}`,
+            category: 'Investissement',
+            amount: amount,
+            quantity: 1,
+            description: `Achat d'actions pour le projet ${projectName}`
+          }
+        ],
         // Metadata to track which user / project this payment belongs to
         metadata: {
           user_id: userId,
