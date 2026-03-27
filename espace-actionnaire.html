@@ -727,25 +727,35 @@ async function doInvest(projectId, projectName) {
   }
 
   try {
-    const res = await fetch('/api/create-payment', {
+    // Appel direct à Naboopay depuis le navigateur (contourne le blocage IP Vercel)
+    const NABOO_KEY = 'pk_live_naboo_L8ZjXhlaNBuQU6N-_7a-ZMFVGBgaKuuhCJcKAeZy5XM=';
+    const APP_URL = 'https://universalfabsn.space';
+
+    const nabooRes = await fetch('https://api.naboopay.com/api/v2/transactions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Authorization': `Bearer ${NABOO_KEY}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
       body: JSON.stringify({
-        userId: currentUser.id,
-        userEmail: currentUser.email,
-        projectId,
-        projectName,
-        amount,
+        method_of_payment: ['wave', 'orange_money'],
+        products: [{ name: 'Action Universal Fab', price: amount, quantity: 1 }],
+        success_url: `${APP_URL}/espace-actionnaire.html?payment=success&project=${projectId}`,
+        error_url: `${APP_URL}/espace-actionnaire.html?payment=error`,
+        fees_customer_side: false,
+        is_escrow: false,
       }),
     });
-    const data = await res.json();
+
+    const data = await nabooRes.json();
     if (data.checkout_url) {
       window.location.href = data.checkout_url;
     } else {
-      toast(data.error + (data.detail ? ': ' + JSON.stringify(data.detail) : ''), 'error');
+      toast('Erreur Naboopay: ' + JSON.stringify(data), 'error');
     }
   } catch (e) {
-    toast('Erreur réseau. Vérifiez votre connexion.', 'error');
+    toast('Erreur réseau : ' + e.message, 'error');
   }
 }
 
