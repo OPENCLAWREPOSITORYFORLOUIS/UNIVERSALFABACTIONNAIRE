@@ -6,8 +6,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const NABOO_API_KEY = process.env.NABOO_API_KEY;
-  const APP_URL = process.env.APP_URL || 'https://actionuniversalfab.com';
+  const NABOO_API_KEY = (process.env.NABOO_API_KEY || '').trim();
+  const APP_URL = process.env.APP_URL || 'https://universalfabsn.space';
 
   try {
     const { userId, userEmail, projectId, projectName, amount } = req.body;
