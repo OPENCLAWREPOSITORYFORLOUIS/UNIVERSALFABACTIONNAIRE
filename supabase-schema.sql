@@ -47,12 +47,21 @@ values (
 create table if not exists public.investments (
   id                     uuid primary key default gen_random_uuid(),
   user_id                uuid references public.profiles(id),
-  project_id             text references public.projects(id),
+  project_id             text,
   amount_paid            numeric not null,
   shares_count           numeric not null,
-  naboopay_transaction_id text,
+  order_id               text unique,           -- ID Naboopay
+  status                 text default 'pending', -- pending | paid | cancelled
+  paid_at                timestamptz,
   created_at             timestamptz default now()
 );
+
+-- ⚠️ Si la table existe déjà, exécutez ces ALTER pour ajouter les colonnes :
+-- alter table public.investments add column if not exists order_id text unique;
+-- alter table public.investments add column if not exists status text default 'pending';
+-- alter table public.investments add column if not exists paid_at timestamptz;
+-- alter table public.profiles add column if not exists phone text;
+
 
 -- 4. Historique des retraits (dividendes)
 create table if not exists public.payouts (
