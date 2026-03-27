@@ -1,5 +1,5 @@
 // api/create-payment.js
-// Vercel Serverless Function — Creates a Naboopay checkout session
+// Vercel Serverless Function — Creates a Naboopay v2 checkout session
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -7,50 +7,41 @@ export default async function handler(req, res) {
   }
 
   const NABOO_API_KEY = (process.env.NABOO_API_KEY || '').trim();
-  const APP_URL = process.env.APP_URL || 'https://universalfabsn.space';
+  const APP_URL = (process.env.APP_URL || 'https://universalfabsn.space').trim();
+
+  if (!NABOO_API_KEY) {
+    return res.status(500).json({ error: 'NABOO_API_KEY manquante dans les variables Vercel.' });
+  }
 
   try {
-    const { userId, userEmail, projectId, projectName, amount } = req.body;
+    const { userId, projectId, projectName, amount } = req.body;
+    const numAmount = Math.round(parseFloat(amount));
 
-    if (!NABOO_API_KEY) {
-      console.error('NABOO_API_KEY is missing in env');
-      return res.status(500).json({ error: 'Config server error: NABOO_API_KEY is not defined in Vercel. Make sure names match (NABOO_API_KEY with underscores).' });
+    if (!userId || !projectId || !numAmount || numAmount < 200) {
+      return res.status(400).json({ error: 'Montant invalide (minimum 200 FCFA).' });
     }
 
-    const project = PROJECTS.find(p => p.id === projectId);
-    if (!project) {
-      return res.status(400).json({ error: 'Projet invalide.' });
-    }
-
-    const numAmount = parseInt(amount);
-    const minAmount = project.min_shares * project.price_per_share;
-
-    if (!userId || !projectId || !numAmount || numAmount < minAmount) {
-      return res.status(400).json({ error: `Montant invalide (minimum ${minAmount} FCFA)` });
-    }
-
-    // Call Naboopay API V2
+    // ─── Naboopay API v2 (endpoint correct + payload correct) ───
     const nabooRes = await fetch('https://api.naboopay.com/api/v2/transactions', {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${NABOO_API_KEY}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
       body: JSON.stringify({
         method_of_payment: ['wave', 'orange_money'],
         products: [
           {
-            name: project.name,
-            price: project.price_per_share, // Unit price
-            quantity: numAmount / project.price_per_share, // Number of shares
-            description: `Achat d'actions ${project.name}`
+            name: projectName.substring(0, 50),
+            price: numAmount,   // <-- "price" et non "amount"
+            quantity: 1,
           }
         ],
-        success_url: `${APP_URL}/espace-actionnaire.html?payment=success`,
-        error_url: `${APP_URL}/espace-actionnaire.html?payment=error`,
+        success_url: `${APP_URL}/espace-actionnaire.html?payment=success&project=${projectId}`,
+        error_url:   `${APP_URL}/espace-actionnaire.html?payment=error`,
+        fees_customer_side: false,
         is_escrow: false,
-        fees_customer_side: false
       }),
     });
 
@@ -63,25 +54,20 @@ export default async function handler(req, res) {
     }
 
     if (!nabooRes.ok) {
-      console.error('Naboopay V2 Error:', nabooRes.status, responseText);
-      return res.status(nabooRes.status).json({ 
-        error: `Naboopay API V2 Error (${nabooRes.status})`, 
-        detail: nabooData 
+      console.error('Naboopay v2 Error:', nabooRes.status, responseText);
+      return res.status(500).json({
+        error: `Naboopay erreur ${nabooRes.status}`,
+        detail: nabooData,
       });
     }
 
-    // Return checkout_url and order_id as per V2 documentation
     return res.status(200).json({
       checkout_url: nabooData.checkout_url,
       order_id: nabooData.order_id,
     });
 
   } catch (err) {
-    console.error('Fatal Server Error:', err);
-    return res.status(500).json({ 
-      error: 'Internal server error', 
-      message: err.message,
-      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
-    });
+    console.error('Erreur serveur:', err);
+    return res.status(500).json({ error: 'Internal server error', message: err.message });
   }
 }
