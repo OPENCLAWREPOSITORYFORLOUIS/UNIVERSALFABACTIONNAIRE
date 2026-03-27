@@ -727,9 +727,9 @@ async function doInvest(projectId, projectName) {
   }
 
   try {
-    // Appel direct à Naboopay depuis le navigateur (contourne le blocage IP Vercel)
     const NABOO_KEY = 'pk_live_naboo_L8ZjXhlaNBuQU6N-_7a-ZMFVGBgaKuuhCJcKAeZy5XM=';
     const APP_URL = 'https://universalfabsn.space';
+    const project = PROJECTS.find(p => p.id === projectId);
 
     const nabooRes = await fetch('https://api.naboopay.com/api/v2/transactions', {
       method: 'POST',
@@ -749,13 +749,24 @@ async function doInvest(projectId, projectName) {
     });
 
     const data = await nabooRes.json();
-    if (data.checkout_url) {
+    if (data.checkout_url && data.order_id) {
+      // Sauvegarder l'investissement en attente dans Supabase
+      const sharesCount = amount / (project?.price_per_share || 10000);
+      await db.from('investments').insert({
+        user_id: currentUser.id,
+        project_id: projectId,
+        order_id: data.order_id,
+        amount_paid: amount,
+        shares_count: sharesCount,
+        status: 'pending',
+      });
+      // Rediriger vers la page de paiement
       window.location.href = data.checkout_url;
     } else {
       toast('Erreur Naboopay: ' + JSON.stringify(data), 'error');
     }
   } catch (e) {
-    toast('Erreur réseau : ' + e.message, 'error');
+    toast('Erreur : ' + e.message, 'error');
   }
 }
 
