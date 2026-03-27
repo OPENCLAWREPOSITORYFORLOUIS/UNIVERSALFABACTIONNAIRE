@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   }
 
   const NABOO_API_KEY = (process.env.NABOO_API_KEY || '').trim();
-  const APP_URL = (process.env.APP_URL || 'https://universalfabsn.space').trim();
+  const APP_URL = (process.env.APP_URL || 'https://universalfabsn.space').trim().replace(/\/$/, '');
 
   if (!NABOO_API_KEY) {
     return res.status(500).json({ error: 'NABOO_API_KEY manquante dans les variables Vercel.' });
