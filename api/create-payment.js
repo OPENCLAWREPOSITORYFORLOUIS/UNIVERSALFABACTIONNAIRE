@@ -1,5 +1,5 @@
 // api/create-payment.js
-// Vercel Serverless Function — Creates a Naboopay v2 checkout session
+// Vercel Serverless Function — Naboopay v2
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -14,14 +14,25 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { userId, projectId, projectName, amount } = req.body;
+    const { userId, projectId, amount } = req.body;
     const numAmount = Math.round(parseFloat(amount));
 
     if (!userId || !projectId || !numAmount || numAmount < 200) {
       return res.status(400).json({ error: 'Montant invalide (minimum 200 FCFA).' });
     }
 
-    // ─── Naboopay API v2 (endpoint correct + payload correct) ───
+    const nabooBody = {
+      method_of_payment: ['wave', 'orange_money'],
+      products: [{ name: 'Action Universal Fab', price: numAmount, quantity: 1 }],
+      success_url: `${APP_URL}/espace-actionnaire.html?payment=success&project=${projectId}`,
+      error_url: `${APP_URL}/espace-actionnaire.html?payment=error`,
+      fees_customer_side: false,
+      is_escrow: false,
+    };
+
+    console.log('NABOO REQUEST:', JSON.stringify(nabooBody));
+    console.log('NABOO KEY (debut):', NABOO_API_KEY.substring(0, 20));
+
     const nabooRes = await fetch('https://api.naboopay.com/api/v2/transactions', {
       method: 'POST',
       headers: {
@@ -29,32 +40,16 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      body: JSON.stringify({
-        method_of_payment: ['wave', 'orange_money'],
-        products: [
-          {
-            name: projectName.substring(0, 50),
-            price: numAmount,   // <-- "price" et non "amount"
-            quantity: 1,
-          }
-        ],
-        success_url: `${APP_URL}/espace-actionnaire.html?payment=success&project=${projectId}`,
-        error_url:   `${APP_URL}/espace-actionnaire.html?payment=error`,
-        fees_customer_side: false,
-        is_escrow: false,
-      }),
+      body: JSON.stringify(nabooBody),
     });
 
-    const responseText = await nabooRes.text();
+    const rawText = await nabooRes.text();
+    console.log('NABOO RESPONSE status:', nabooRes.status, '| body:', rawText || '(vide)');
+
     let nabooData = {};
-    try {
-      nabooData = JSON.parse(responseText);
-    } catch (e) {
-      nabooData = { rawResponse: responseText };
-    }
+    try { nabooData = JSON.parse(rawText); } catch (e) { nabooData = { rawResponse: rawText }; }
 
     if (!nabooRes.ok) {
-      console.error('Naboopay v2 Error:', nabooRes.status, responseText);
       return res.status(500).json({
         error: `Naboopay erreur ${nabooRes.status}`,
         detail: nabooData,
@@ -67,7 +62,7 @@ export default async function handler(req, res) {
     });
 
   } catch (err) {
-    console.error('Erreur serveur:', err);
+    console.error('Erreur serveur:', err.message);
     return res.status(500).json({ error: 'Internal server error', message: err.message });
   }
 }
