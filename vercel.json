@@ -10,5 +10,10 @@
       ]
     }
   ],
-  "cleanUrls": true
+  "cleanUrls": true,
+  "functions": {
+    "api/create-payment.js": {
+      "regions": ["iad1"]
+    }
+  }
 }
