@@ -718,10 +718,13 @@ async function doInvest(projectId, projectName) {
   const amountInput = document.getElementById(`inv-${projectId}`);
   const amount = parseInt(amountInput.value);
   const project = PROJECTS.find(p => p.id === projectId);
-  const minAmount = project.price_per_share * project.min_shares;
+  const minAmount = 200;
 
   if (!amount || isNaN(amount)) { toast('Entrez un montant à investir.', 'error'); return; }
-  if (amount < minAmount) { toast(`Montant minimum : ${formatCFA(minAmount)}`, 'error'); return; }
+  if (amount < minAmount) {
+    toast(`Minimum ${minAmount} FCFA requis`, 'error');
+    return;
+  }
 
   try {
     const res = await fetch('/api/create-payment', {

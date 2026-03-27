@@ -17,35 +17,35 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Config server error: NABOO_API_KEY is not defined in Vercel. Make sure names match (NABOO_API_KEY with underscores).' });
     }
 
-    if (!userId || !projectId || !amount) {
-      return res.status(400).json({ error: 'Missing required fields' });
+    const project = PROJECTS.find(p => p.id === projectId);
+    if (!project) {
+      return res.status(400).json({ error: 'Projet invalide.' });
     }
 
-    const numAmount = Number(amount);
+    const numAmount = parseFloat(amount);
+    const minAmount = project.min_shares * project.price_per_share;
 
-    // Call Naboopay API to create a payment transaction
+    if (!userId || !projectId || !numAmount || numAmount < minAmount) {
+      return res.status(400).json({ error: `Montant invalide (minimum ${minAmount} FCFA)` });
+    }
+
     const nabooRes = await fetch('https://api.naboopay.com/api/v1/transaction/create-transaction', {
       method: 'POST',
       headers: {
+        'Accept': 'application/json',
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${NABOO_API_KEY}`,
       },
       body: JSON.stringify({
         amount: numAmount,
         currency: 'XOF',
-        description: `Investissement Universal Fab — ${projectName}`,
-        method_of_payment: ['WAVE', 'ORANGE_MONEY', 'FREE_MONEY'],
+        description: `INVESTISSEMENT - ${project.name}`,
+        method_of_payment: ['WAVE'],
         is_merchant: true,
         is_escrow: false,
-        products: [{ name: projectName, quantity: 1, amount: numAmount, category: 'digital' }],
-        success_url: `${APP_URL}/espace-actionnaire.html?payment=success&project=${projectId}`,
+        products: [{ name: `ACTION ${project.name}`, quantity: numAmount / project.price_per_share, amount: numAmount, category: 'digital' }],
+        success_url: `${APP_URL}/espace-actionnaire.html?payment=success`,
         error_url: `${APP_URL}/espace-actionnaire.html?payment=error`,
-        metadata: {
-          user_id: userId,
-          user_email: userEmail,
-          project_id: projectId,
-          project_name: projectName,
-        },
       }),
     });
 
