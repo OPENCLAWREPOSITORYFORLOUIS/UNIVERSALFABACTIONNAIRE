@@ -1,97 +1,112 @@
 function exportToPDF() {
-    console.log("Exporting PDF...");
+    // 1. Identification du modèle
     const title = document.querySelector('h1')?.innerText || 'Devis Universal Fab';
+    const mainImgSrc = document.querySelector('.img img')?.src || ''; // Capture de l'image du produit
     
-    // Robust image grab - try multiple selectors
-    const mainImg = document.querySelector('.img img')?.src 
-                 || document.querySelector('.page-wrap img')?.src 
-                 || '';
-    
+    // 2. Préparation de la section config
     const configSection = document.getElementById('rx-config');
-    if (!configSection) {
-        console.error("RX Config section not found");
-        return;
-    }
+    if (!configSection) return alert("Erreur: Section de configuration non trouvée.");
 
-    // Clone the section for PDF manipulation
+    // Cloner la section pour manipulations PDF
     const clone = configSection.cloneNode(true);
     
-    // 1. Remove interractive elements
-    clone.querySelectorAll('button, script').forEach(el => el.remove());
+    // Nettoyage : retirer les boutons et éléments inutiles
+    clone.querySelectorAll('button').forEach(b => b.remove());
 
-    // 2. Map Choices (OUI/NON)
-    const realInputs = configSection.querySelectorAll('input[type="checkbox"]');
-    const cloneInputs = clone.querySelectorAll('input[type="checkbox"]');
+    // Transformation des sélections (OUI / NON) et des types "Base"
+    const realRows = configSection.querySelectorAll('tr');
+    const cloneRows = clone.querySelectorAll('tr');
     
-    realInputs.forEach((input, i) => {
-        const cloneInput = cloneInputs[i];
-        if (!cloneInput) return;
+    realRows.forEach((row, i) => {
+        const input = row.querySelector('input[type="checkbox"]');
+        const cloneTd = cloneRows[i]?.querySelector('td:last-child');
         
-        const parentCell = cloneInput.closest('td');
-        if (parentCell) {
-            parentCell.innerHTML = input.checked ? 
-                '<span style="color:#2ecc71; font-weight:bold;">OUI</span>' : 
-                '<span style="color:#999;">NON</span>';
+        if (cloneTd) {
+            if (input) {
+                // Remplacer checkbox par texte propre sans crochets
+                cloneTd.innerHTML = input.checked 
+                    ? '<span style="color:#2ecc71; font-weight:bold;">OUI</span>' 
+                    : '<span style="color:#e74c3c;">NON</span>';
+            } else {
+                // Remplacer "Base" par "INCLUS" si c'est un équipement de série
+                const baseSpan = row.querySelector('.rx-base');
+                if (baseSpan) {
+                    cloneTd.innerHTML = '<span style="color:#111; font-weight:bold;">INCLUS</span>';
+                }
+            }
         }
     });
 
-    // 3. Map Base items to "INCLUS"
-    clone.querySelectorAll('.rx-base').forEach(el => {
-        el.innerText = 'INCLUS';
-        el.style.color = '#3D8BFF';
-        el.style.fontWeight = 'bold';
-    });
-
-    // 4. Generate PDF Document
+    // 3. Fenêtre d'impression
     const win = window.open('', '_blank');
-    if (!win) return alert("Veuillez autoriser les pop-ups pour voir le devis.");
+    if (!win) return alert("Veuillez autoriser les pop-ups pour générer le devis.");
 
-    const styles = `
-        <style>
-            body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #111; line-height: 1.6; }
-            .pdf-header { border-bottom: 2px solid #3D8BFF; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; }
-            .pdf-header h1 { font-size: 28px; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
-            .hero-img { width: 100%; height: 300px; object-fit: cover; border-radius: 8px; margin-bottom: 40px; }
-            h2, h3 { color: #3D8BFF; margin-top: 30px; border-bottom: 1px solid #eee; padding-bottom: 8px; font-size: 18px; text-transform: uppercase; }
-            table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-            th { text-align: left; background: #f4f4f4; padding: 12px; font-size: 10px; text-transform: uppercase; border-bottom: 1px solid #ddd; }
-            td { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; }
-            .pdf-footer { margin-top: 60px; font-size: 11px; color: #888; text-align: center; border-top: 1px solid #eee; padding-top: 20px; }
-            @media print { .no-print { display: none; } }
-        </style>
-    `;
-
-    const htmlContent = `
+    const pdfHtml = `
         <!DOCTYPE html>
         <html>
         <head>
+            <meta charset="utf-8">
             <title>Devis - ${title}</title>
-            ${styles}
+            <style>
+                body { font-family: 'Helvetica', 'Arial', sans-serif; padding: 50px; color: #111; background:#fff; line-height: 1.5; }
+                .header { border-bottom: 3px solid #3D8BFF; padding-bottom: 25px; margin-bottom: 35px; display: flex; justify-content: space-between; align-items: flex-end; }
+                .header-left h1 { font-size: 32px; margin: 0; text-transform: uppercase; letter-spacing: 2px; }
+                .header-left p { margin: 8px 0 0 0; color: #3D8BFF; font-weight: bold; font-size: 16px; }
+                .hero-img { width: 100%; height: 300px; object-fit: cover; border-radius: 12px; margin-bottom: 40px; border: 1px solid #eee; }
+                
+                h2 { color: #3D8BFF; margin-top: 40px; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                th { text-align: left; background: #fafafa; padding: 12px 15px; font-size: 11px; text-transform: uppercase; color: #888; border-bottom: 1px solid #eee; }
+                td { padding: 18px 15px; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+                
+                .footer { margin-top: 80px; font-size: 11px; color: #aaa; text-align: center; border-top: 1px solid #f0f0f0; padding-top: 30px; letter-spacing: 0.5px; }
+                
+                @media print { 
+                    body { padding: 20px; } 
+                    .no-print { display: none; }
+                }
+            </style>
         </head>
         <body>
-            <div class="pdf-header">
-                <div>
+            <div class="header">
+                <div class="header-left">
                     <h1>UNIVERSAL FAB</h1>
-                    <p style="margin: 5px 0 0 0;">Spécifications techniques du modèle ${title}</p>
+                    <p>DEVIS TECHNIQUE - ${title}</p>
+                </div>
+                <div style="text-align:right; font-size: 12px; color: #999;">
+                    Document généré le ${new Date().toLocaleDateString('fr-FR')}
                 </div>
             </div>
-            ${mainImg ? `<img src="${mainImg}" class="hero-img">` : ''}
-            <div>
+
+            ${mainImgSrc ? `<img src="${mainImgSrc}" class="hero-img" alt="Aperçu modèle">` : ''}
+
+            <p style="font-size: 14px; max-width: 600px; margin-bottom: 30px;">
+                Ce document récapitule la configuration et les équipements sélectionnés pour votre restaurant mobile Universal Fab.
+            </p>
+
+            <div class="pdf-content">
                 ${clone.innerHTML}
             </div>
-            <div class="pdf-footer">
-                Ce document est un récapitulatif technique. Universal Fab - Design & Technologie.
+
+            <div class="footer">
+                © ${new Date().getFullYear()} UNIVERSAL FAB. Ce devis est fourni à titre indicatif et ne vaut pas bon de commande final. <br>
+                Contactez notre département commercial pour une offre ferme et définitive.
             </div>
         </body>
         </html>
     `;
 
-    win.document.write(htmlContent);
+    win.document.write(pdfHtml);
     win.document.close();
-
-    // Small delay to ensure images load
+    
+    // Fix du freeze barbalogo/gsap : Focus sur la nouvelle fenêtre avant print
     setTimeout(() => {
         win.focus();
         win.print();
+        // Optionnel : fermer automatiquement après impression (certains navigateurs bloquent)
+        // win.close(); 
     }, 800);
 }
+
+// Global scope
+window.exportToPDF = exportToPDF;
