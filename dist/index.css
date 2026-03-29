@@ -1765,3 +1765,35 @@ gl-wave-effect {
 
 
 /*# sourceMappingURL=/dist/index.css.map */
+
+/* Global Espace Actionnaire Styles */
+.nos-produits-bubble {
+    background-color: #000 !important;
+    color: #fff !important;
+    padding: 8px 18px !important;
+    border-radius: 25px !important;
+    text-transform: uppercase;
+    font-size: 14px !important;
+    font-weight: bold !important;
+    display: inline-block !important;
+    text-decoration: none !important;
+    transition: opacity 0.3s ease;
+    position: relative;
+    z-index: 10000;
+}
+.nos-produits-bubble:hover {
+    opacity: 0.8;
+}
+
+
+/* Premium Checkboxes */
+.config-table { width: 100%; max-width: 800px; margin: 40px auto; border-collapse: separate; border-spacing: 0 16px; }
+.config-table tr { background: rgba(25, 25, 25, 0.6); backdrop-filter: blur(10px); border-radius: 12px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+.config-table tr:hover { background: rgba(40, 40, 40, 0.8); transform: translateY(-3px) scale(1.01); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); cursor: pointer;}
+.config-table td { padding: 24px; font-size: 18px; color: #fff; border-bottom: none; }
+.config-table td:first-child { border-radius: 12px 0 0 12px; width: 60px; text-align: center; }
+.config-table td:last-child { border-radius: 0 12px 12px 0; text-align: right; font-weight: 700; color: #3D8BFF; font-size: 20px; letter-spacing: 1px; }
+.config-table input[type="checkbox"] { appearance: none; width: 28px; height: 28px; border: 2px solid #555; border-radius: 8px; background: transparent; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; justify-content: center; }
+.config-table input[type="checkbox"]:checked { background: #3D8BFF; border-color: #3D8BFF; }
+.config-table input[type="checkbox"]:checked::after { content: "✔"; color: #fff; font-size: 18px; font-weight: bold; }
+#total-price { font-size: 42px !important; font-weight: 900; color: #fff; text-shadow: 0 0 20px rgba(61, 139, 255, 0.6); margin-top: 40px; padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.1); display: block; text-align: center; }

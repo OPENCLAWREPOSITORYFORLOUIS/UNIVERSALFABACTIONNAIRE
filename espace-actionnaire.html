@@ -294,6 +294,17 @@
   .my-inv-detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
   .my-inv-shares { font-size: 20px; font-weight: 800; color: var(--accent); }
 </style>
+
+    
+    <!-- Core Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://unpkg.com/@barba/core"></script>
+    
+    <!-- Project Scripts -->
+    <link href="dist/index.css" rel="stylesheet">
+    <script defer src="libs/lottie.js"></script>
+    <script defer src="dist/index.js"></script>
+    <script defer src="js/shared-header.js"></script>
 </head>
 <body>
 
@@ -305,10 +316,10 @@
     <!-- Login Form -->
     <div id="login-form">
       <h1 class="auth-title">Espace Actionnaire</h1>
-      <p class="auth-sub">Connectez-vous avec votre numéro de téléphone.</p>
+      <p class="auth-sub" style="margin-bottom: 24px;">Connectez-vous à votre portefeuille.</p>
       <div class="form-group">
-        <label>Numéro de téléphone (sans indicatif)</label>
-        <input type="tel" id="login-phone" placeholder="77 000 00 00" maxlength="9">
+        <label>E-mail ou Numéro de téléphone</label>
+        <input type="text" id="login-id" placeholder="jean@mail.com ou 770000000">
       </div>
       <div class="form-group">
         <label>Mot de passe</label>
@@ -322,14 +333,18 @@
     <!-- Register Form -->
     <div id="register-form" style="display:none">
       <h1 class="auth-title">Rejoindre l'aventure</h1>
-      <p class="auth-sub">Créez votre compte actionnaire Universal Fab.</p>
+      <p class="auth-sub">Créez votre compte (Remplissez au moins E-mail OU Téléphone).</p>
       <div class="form-group">
         <label>Nom complet</label>
         <input type="text" id="reg-name" placeholder="Prénom Nom">
       </div>
       <div class="form-group">
-        <label>Numéro de téléphone (sans indicatif)</label>
-        <input type="tel" id="reg-phone" placeholder="77 000 00 00" maxlength="9">
+        <label>Adresse E-mail (Optionnel si Numéro renseigné)</label>
+        <input type="email" id="reg-email" placeholder="jean@mail.com">
+      </div>
+      <div class="form-group">
+        <label>Numéro de téléphone (Optionnel si E-mail renseigné)</label>
+        <input type="tel" id="reg-phone" placeholder="77 000 00 00">
       </div>
       <div class="form-group">
         <label>Mot de passe</label>
@@ -492,6 +507,31 @@
       </div>
     </section>
 
+    <!-- ─── PARAMÈTRES DU PROFIL ─── -->
+    <section>
+      <div class="section-header">
+        <div class="section-icon icon-gold">⚙️</div>
+        <h2 class="section-title">Informations Personnelles</h2>
+      </div>
+      <div class="withdraw-card" style="max-width: 650px; margin-bottom:32px;">
+        <p style="font-size:13px; color:var(--muted); margin-bottom:24px;">Veuillez compléter vos informations pour sécuriser l'accès à vos investissements (en cas de perte de numéro ou d'email).</p>
+        <div class="form-group">
+          <label>Nom Complet (Optionnel)</label>
+          <input type="text" id="prof-name" placeholder="Inconnu">
+        </div>
+        <div class="form-group">
+          <label>Adresse E-mail</label>
+          <input type="email" id="prof-email" placeholder="Ex: jean@mail.com">
+        </div>
+        <div class="form-group">
+          <label>Numéro de Téléphone</label>
+          <input type="tel" id="prof-phone" placeholder="+221 77 000 00 00">
+        </div>
+        <div class="auth-error" id="prof-error"></div>
+        <button class="btn btn-ghost" onclick="updateProfile()" style="margin-top:16px;">Mettre à jour mes informations sécurisées</button>
+      </div>
+    </section>
+
     <!-- ─── COMMUNAUTÉ WHATSAPP ─── -->
     <section>
       <a href="https://chat.whatsapp.com/LJ5ao94sDYPDyYzVsqU49r" target="_blank"
@@ -586,11 +626,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// ─── AUTH ───
-function phoneToEmail(phone) {
-  return phone.replace(/\s/g, '') + '@universalfabsn.space';
-}
-
+// ─── AUTH PASSWORD (Classic) ───
 function toggleAuth() {
   const l = document.getElementById('login-form');
   const r = document.getElementById('register-form');
@@ -599,51 +635,132 @@ function toggleAuth() {
 }
 
 async function doLogin() {
-  const phone = document.getElementById('login-phone').value.trim();
-  const pass  = document.getElementById('login-password').value;
-  document.getElementById('login-error').textContent = '';
-  if (!phone || !pass) return document.getElementById('login-error').textContent = 'Remplissez tous les champs.';
-  if (phone.length < 7) return document.getElementById('login-error').textContent = 'Numéro invalide.';
+  const identifier = document.getElementById('login-id').value.trim();
+  const pass = document.getElementById('login-password').value;
+  const err = document.getElementById('login-error');
+  err.textContent = '';
+  
+  if (!identifier || !pass) return err.textContent = 'Remplissez tous les champs.';
 
-  const email = phoneToEmail(phone);
-  const { error } = await db.auth.signInWithPassword({ email, password: pass });
-  if (error) document.getElementById('login-error').textContent = 'Numéro ou mot de passe incorrect.';
+  let isEmail = identifier.includes('@');
+  let phone = !isEmail ? identifier.replace(/\s/g, '') : null;
+  if (phone && !phone.startsWith('+')) phone = '+221' + phone;
+
+  try {
+    let res;
+    if (isEmail) {
+      res = await db.auth.signInWithPassword({ email: identifier, password: pass });
+    } else {
+      res = await db.auth.signInWithPassword({ phone, password: pass });
+    }
+    
+    if (res.error) throw res.error;
+    toast('Connexion réussie !', 'success');
+  } catch (e) {
+    err.textContent = "Identifiants incorrects. " + e.message;
+  }
 }
 
 async function doRegister() {
-  const name  = document.getElementById('reg-name').value.trim();
-  const phone = document.getElementById('reg-phone').value.trim();
-  const pass  = document.getElementById('reg-password').value;
-  document.getElementById('reg-error').textContent = '';
-  if (!name || !phone || !pass) return document.getElementById('reg-error').textContent = 'Remplissez tous les champs.';
-  if (phone.length < 7) return document.getElementById('reg-error').textContent = 'Numéro invalide.';
-  if (pass.length < 8) return document.getElementById('reg-error').textContent = 'Mot de passe minimum 8 caractères.';
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  let phone = document.getElementById('reg-phone').value.trim();
+  const pass = document.getElementById('reg-password').value;
+  const err = document.getElementById('reg-error');
+  err.textContent = '';
 
-  const email = phoneToEmail(phone);
-  const { data, error } = await db.auth.signUp({ email, password: pass, options: { data: { full_name: name, phone } } });
-  if (error) { document.getElementById('reg-error').textContent = error.message; return; }
+  if (!email && !phone) return err.textContent = 'Veuillez renseigner au moins un E-mail ou un Téléphone.';
+  if (!pass || pass.length < 8) return err.textContent = 'Le mot de passe doit faire au moins 8 caractères.';
+  if (phone && !phone.startsWith('+')) phone = '+221' + phone.replace(/\s/g, '');
 
-  await db.from('profiles').upsert({
-    id: data.user.id, email, full_name: name, phone,
-    total_shares_count: 0, total_invested: 0, dividends_balance: 0,
-  });
-  toast('Compte créé avec succès ! Vous pouvez vous connecter.', 'success');
-  toggleAuth();
+  try {
+    let res;
+    if (email) {
+      res = await db.auth.signUp({ email, password: pass, options: { data: { full_name: name, phone: phone || null } } });
+    } else {
+      res = await db.auth.signUp({ phone, password: pass, options: { data: { full_name: name, email: null } } });
+    }
+    
+    if (res.error) throw res.error;
+
+    if (res.data && res.data.user) {
+      await db.from('profiles').upsert({
+        id: res.data.user.id,
+        email: email || null,
+        full_name: name,
+        phone: phone || null,
+        total_shares_count: 0, total_invested: 0, dividends_balance: 0
+      });
+    }
+
+    toast('Compte créé avec succès ! Connectez-vous.', 'success');
+    toggleAuth();
+  } catch (e) {
+    err.textContent = e.message;
+  }
 }
 
 async function doLogout() {
   await db.auth.signOut();
+  window.location.reload();
+}
+
+async function updateProfile() {
+  const newEmail = document.getElementById('prof-email').value.trim();
+  const newPhone = document.getElementById('prof-phone').value.trim();
+  const newName = document.getElementById('prof-name').value.trim();
+  const err = document.getElementById('prof-error');
+  err.textContent = '';
+  
+  if (!newEmail && !newPhone) return toast("Veuillez remplir au moins un email ou un téléphone.", "error");
+
+  let fPhone = newPhone;
+  if (fPhone && !fPhone.startsWith('+')) fPhone = '+221' + fPhone.replace(/\s/g, '');
+
+  try {
+    const updates = {};
+    if (newEmail && newEmail !== currentUser.email) updates.email = newEmail;
+    if (fPhone && fPhone !== currentUser.phone) updates.phone = fPhone;
+    
+    if (Object.keys(updates).length > 0) {
+      const { error: authErr } = await db.auth.updateUser(updates);
+      if (authErr) throw authErr;
+      if (updates.email) toast("Lien de confirmation envoyé au nouvel E-mail.", "success");
+      // Phone change might also require OTP, but usually it just updates metadata
+    }
+
+    const { error: dbErr } = await db.from('profiles').update({
+      full_name: newName || currentUser.user_metadata?.full_name || null,
+      email: newEmail || currentUser.email || null,
+      phone: fPhone || currentUser.phone || null
+    }).eq('id', currentUser.id);
+    if (dbErr) throw dbErr;
+    
+    currentProfile.full_name = newName || currentProfile.full_name;
+    currentProfile.email = newEmail || currentProfile.email;
+    currentProfile.phone = fPhone || currentProfile.phone;
+    
+    toast("Informations sécurisées et mises à jour !", "success");
+  } catch (e) {
+    err.textContent = e.message;
+  }
 }
 
 // ─── DASHBOARD ───
 async function enterDashboard() {
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
-  // Afficher numéro de téléphone extrait de l'email interne
-  const phone = (currentUser.user_metadata?.phone) || currentUser.email?.replace('@universalfabsn.space','') || currentUser.email;
-  document.getElementById('nav-email').textContent = phone;
+  // Afficher numéro de téléphone extrait de l'email interne ou natif
+  const identifier = currentUser.phone ? currentUser.phone : currentUser.email;
+  document.getElementById('nav-email').textContent = identifier || 'Actionnaire';
 
   await loadProfile();
+  
+  // Fill profile form proactively
+  document.getElementById('prof-name').value = currentProfile.full_name || currentUser.user_metadata?.full_name || '';
+  document.getElementById('prof-email').value = currentUser.email || currentProfile.email || '';
+  document.getElementById('prof-phone').value = currentUser.phone || currentProfile.phone || '';
+
   renderProjects();
   await loadMyInvestments();
   await loadPayoutHistory();
