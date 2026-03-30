@@ -868,7 +868,7 @@ async function doInvest(projectId, projectName) {
   }
 
   try {
-    const res = await fetch('/api/create-payment', {
+    const res = await fetch('/api/create-paydunya-payment', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -877,27 +877,27 @@ async function doInvest(projectId, projectName) {
       body: JSON.stringify({
         amount: amount,
         projectId: projectId,
-        projectName: project?.name || projectName,
+        projectName: projectName,
         userId: currentUser.id
       }),
     });
 
     const data = await res.json();
-    if (data.checkout_url && data.order_id) {
+    if (data.redirect_url) {
       // Sauvegarder l'investissement en attente dans Supabase
       const sharesCount = amount / (project?.price_per_share || 10000);
       await db.from('investments').insert({
         user_id: currentUser.id,
         project_id: projectId,
-        order_id: data.order_id,
+        order_id: data.token, // Store PayDunya token as order_id
         amount_paid: amount,
         shares_count: sharesCount,
         status: 'pending',
       });
-      // Rediriger vers la page de paiement
-      window.location.href = data.checkout_url;
+      // Rediriger vers la page PayDunya
+      window.location.href = data.redirect_url;
     } else {
-      toast('Erreur de paiement : ' + (data.error || 'Inconnue'), 'error');
+      toast('Erreur de paiement PayDunya : ' + (data.error || 'Inconnue'), 'error');
     }
   } catch (e) {
     toast('Erreur : ' + e.message, 'error');
