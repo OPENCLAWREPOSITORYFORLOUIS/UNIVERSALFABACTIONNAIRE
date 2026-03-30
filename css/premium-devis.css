@@ -1,0 +1,212 @@
+/* premium-devis.css - Universal Fab */
+:root {
+  --p: #3D8BFF;
+  --b: #eee;
+  --bg-color: #ffffff;
+  --text-main: #111111;
+  --text-muted: #888888;
+  --table-border: #f0f0f0;
+  --table-bg: #fdfdfd;
+  --hover-bg: #f9f9f9;
+}
+
+body {
+  background: var(--bg-color) !important;
+  color: var(--text-main) !important;
+}
+
+.case.page-wrap {
+  padding: 0 !important;
+  max-width: 100% !important;
+  background: var(--bg-color) !important;
+}
+
+.container {
+  max-width: 100% !important;
+  width: 100% !important;
+  padding: 0 !important;
+}
+
+.menu-black {
+  background: var(--bg-color) !important;
+  color: var(--text-main) !important;
+  padding: 0 5% !important;
+}
+
+.case__intro h3, .case__information p {
+  color: var(--text-main) !important;
+}
+
+.rx-config {
+  width: 100% !important;
+  background: var(--bg-color) !important;
+  border-top: 3px solid var(--p);
+  margin-top: 80px;
+}
+
+.rx-config__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 60px 5% !important;
+  border-bottom: 1px solid var(--table-border);
+}
+
+.rx-config__title {
+  color: var(--text-main) !important;
+  font-size: 36px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.rx-table-group {
+  padding: 60px 5% !important;
+  border-bottom: 1px solid #f7f7f7;
+}
+
+.rx-table-group__title {
+  color: var(--p) !important;
+  font-size: 15px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 40px;
+}
+
+.rx-table {
+  width: 100% !important;
+  border-collapse: separate;
+  border-spacing: 0 12px;
+}
+
+.rx-table th {
+  color: var(--text-muted) !important;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  padding: 0 30px 10px;
+  text-align: left;
+}
+
+.rx-table tr {
+  background: var(--table-bg) !important;
+  transition: all 0.3s ease;
+  border: 1px solid #f5f5f5;
+  border-radius: 12px;
+}
+
+.rx-table tr:hover {
+  background: var(--hover-bg) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+}
+
+.rx-table td {
+  color: var(--text-main) !important;
+  padding: 30px;
+  font-size: 15px;
+  border-top: 1px solid #f9f9f9;
+}
+
+.rx-table tr td:first-child {
+  border-radius: 12px 0 0 12px;
+  width: 80px;
+  color: var(--p) !important;
+  font-weight: 900;
+  text-align: center;
+  font-size: 18px !important;
+}
+
+.rx-table tr td:last-child {
+  border-radius: 0 12px 12px 0;
+  width: 160px;
+  text-align: center;
+}
+
+/* Custom Checkbox Design */
+.rx-check {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.rx-check input {
+  display: none;
+}
+
+.rx-check span {
+  width: 38px;
+  height: 38px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  background: #fff;
+}
+
+.rx-check input:checked + span {
+  background: var(--p) !important;
+  border-color: var(--p) !important;
+  box-shadow: 0 8px 25px rgba(61,139,255,0.3);
+  transform: scale(1.05);
+}
+
+.rx-check input:checked + span::after {
+  content: "✔";
+  color: #fff;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.rx-export-btn {
+  background: var(--text-main) !important;
+  color: #fff !important;
+  border: none;
+  padding: 22px 50px !important;
+  border-radius: 100px !important;
+  font-weight: 900;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.3s;
+  font-size: 14px;
+}
+
+.rx-export-btn:hover {
+  background: var(--p) !important;
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(61,139,255,0.3);
+}
+
+.rx-base {
+  background: #f0f0f0;
+  color: #555;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* Responsive Overrides */
+@media screen and (max-width: 991px) {
+  .rx-config__header {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+    padding: 40px 1.5rem !important;
+  }
+  .rx-table-group {
+    padding: 40px 1.5rem !important;
+  }
+  .rx-table th {
+    display: none;
+  }
+  .rx-table td {
+    padding: 20px 15px !important;
+    font-size: 14px;
+  }
+}
