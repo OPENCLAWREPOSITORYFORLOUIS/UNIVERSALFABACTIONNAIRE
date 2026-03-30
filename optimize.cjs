@@ -1,26 +1,42 @@
+const fs = require('fs');
 
+// 1. Optimize Video Preloading for speed (1s target)
+const pages = ['index.html', 'work.html', 'select.html', 'vault.html', 'microsoft.html', 'devis-automatique.html'];
+pages.forEach(p => {
+    if (!fs.existsSync(p)) return;
+    let s = fs.readFileSync(p, 'utf8');
+    // Change preload="auto" to preload="metadata" to save bandwidth and speed up page finish
+    s = s.replace(/preload="auto"/g, 'preload="metadata"');
+    // Ensure all images are lazy-loaded
+    s = s.replace(/<img (?!.*loading="lazy")/g, '<img loading="lazy" ');
+    fs.writeFileSync(p, s);
+});
+
+// 2. Fix PayDunya Handler (Read everything to debug)
+const pdPath = 'c:\\Mes Sites Web\\onto universal\\ontooriginal\\api\\create-paydunya-payment.js';
+const pdCode = `
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   const MASTER_KEY = (process.env.PAYDUNYA_MASTER_KEY || '').trim();
   const PRIVATE_KEY = (process.env.PAYDUNYA_PRIVATE_KEY || '').trim();
   const TOKEN = (process.env.PAYDUNYA_TOKEN || '').trim();
-  const APP_URL = (process.env.APP_URL || 'https://universalfabsn.space').replace(/\/$/, '');
+  const APP_URL = (process.env.APP_URL || 'https://universalfabsn.space').replace(/\\/$/, '');
 
   const { amount, projectId, projectName, userId } = req.body;
 
   const invoice = {
     invoice: {
       total_amount: amount,
-      description: `Investissement dans ${projectName} (Universal Fab)`,
+      description: \`Investissement dans \${projectName} (Universal Fab)\`,
     },
     store: {
       name: "Universal Fab",
       website_url: APP_URL,
     },
     actions: {
-      cancel_url: `${APP_URL}/espace-actionnaire.html?payment=cancel`,
-      return_url: `${APP_URL}/espace-actionnaire.html?payment=success&project=${projectId}`,
+      cancel_url: \`\${APP_URL}/espace-actionnaire.html?payment=cancel\`,
+      return_url: \`\${APP_URL}/espace-actionnaire.html?payment=success&project=\${projectId}\`,
     },
     custom_data: { userId, projectId, amount }
   };
@@ -45,7 +61,7 @@ export default async function handler(req, res) {
       if (data.response_code === '00') {
         return res.status(200).json({
           token: data.token,
-          redirect_url: `https://app.paydunya.com/checkout/invoice/${data.token}`
+          redirect_url: \`https://app.paydunya.com/checkout/invoice/\${data.token}\`
         });
       } else {
         return res.status(500).json({ error: 'PayDunya: ' + (data.response_text || bodyText) });
@@ -57,3 +73,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Internal Error', message: err.message });
   }
 }
+`;
+
+fs.writeFileSync(pdPath, pdCode, 'utf8');
+console.log('Optimized for speed and updated debug logs.');
