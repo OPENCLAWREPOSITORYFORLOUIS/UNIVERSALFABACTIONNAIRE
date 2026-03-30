@@ -532,6 +532,13 @@
       </div>
     </section>
 
+    <!-- ─── DEBUG ADMIN (Solo pour tests) ─── -->
+    <section id="admin-debug" style="display:none; border: 2px dashed var(--gold); border-radius: 20px; padding: 28px; margin-top: 40px; margin-bottom: 32px;">
+      <div style="color:var(--gold); font-weight:900; margin-bottom:12px;">🛠️ MODE DÉVELOPPEUR</div>
+      <p style="font-size:12px; margin-bottom:16px;">Ce menu n'est visible que pour votre compte de test. Utilisez-le pour créditer votre solde et tester les retraits.</p>
+      <button class="btn btn-gold btn-sm" onclick="simulateCredit(1000000)">+ Créditer 1 000 000 FCFA</button>
+    </section>
+
     <!-- ─── COMMUNAUTÉ WHATSAPP ─── -->
     <section>
       <a href="https://chat.whatsapp.com/LJ5ao94sDYPDyYzVsqU49r" target="_blank"
@@ -568,9 +575,9 @@ const PROJECTS = [
     name: 'Universal Fab (Entreprise globale)',
     description: 'Investissement et achat d\'actions dans l\'entreprise Universal Fab (maison mère).',
     emoji: '🏭',
-    price_per_share: 10000,
-    min_shares: 0.01,
-    target_shares: 5000,
+    price_per_share: 2000,
+    min_shares: 5,
+    target_shares: 50000,
     sold_shares: 0,
     status: 'Ouvert',
     roi: '',
@@ -580,9 +587,9 @@ const PROJECTS = [
     name: 'Restaurants Mobiles',
     description: 'Déploiement stratégique de restaurants mobiles solaires au Sénégal.',
     emoji: '🍽️',
-    price_per_share: 10000,
-    min_shares: 0.01,
-    target_shares: 500,
+    price_per_share: 2000,
+    min_shares: 5,
+    target_shares: 5000,
     sold_shares: 0,
     status: 'Ouvert',
     roi: '',
@@ -619,6 +626,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (params.get('payment') === 'success') {
     toast('Paiement reçu ! Vos actions seront attribuées dans quelques instants.', 'success');
     window.history.replaceState({}, '', window.location.pathname);
+    // Auto-refresh profile after a short delay to allow IPN to process
+    setTimeout(() => {
+      loadProfile();
+      loadMyInvestments();
+    }, 3000);
   }
   if (params.get('payment') === 'error') {
     toast('Le paiement a été annulé ou a échoué.', 'error');
@@ -764,6 +776,7 @@ async function enterDashboard() {
   renderProjects();
   await loadMyInvestments();
   await loadPayoutHistory();
+  await checkAdminStatus();
 }
 
 async function loadProfile() {
@@ -859,7 +872,7 @@ async function doInvest(projectId, projectName) {
   const amountInput = document.getElementById(`inv-${projectId}`);
   const amount = parseInt(amountInput.value);
   const project = PROJECTS.find(p => p.id === projectId);
-  const minAmount = 200;
+  const minAmount = 10000;
 
   if (!amount || isNaN(amount)) { toast('Entrez un montant à investir.', 'error'); return; }
   if (amount < minAmount) {
@@ -952,10 +965,10 @@ async function loadPayoutHistory() {
       <th>Date</th><th>Montant</th><th>Operateur</th><th>Statut</th>
     </tr></thead>
     <tbody>${data.map(p => `<tr>
-      <td>${new Date(p.created_at).toLocaleDateString('fr-FR')}</td>
-      <td>${formatCFA(p.amount)}</td>
-      <td>${p.operator || '—'}</td>
-      <td><span class="status-pill ${p.status === 'paid' ? 'pill-paid' : 'pill-pending'}">${p.status === 'paid' ? 'Payé' : 'En cours'}</span></td>
+      <td data-label="Date">${new Date(p.created_at).toLocaleDateString('fr-FR')}</td>
+      <td data-label="Montant">${formatCFA(p.amount)}</td>
+      <td data-label="Opérateur">${p.operator || '—'}</td>
+      <td data-label="Statut"><span class="status-pill ${p.status === 'paid' ? 'pill-paid' : 'pill-pending'}">${p.status === 'paid' ? 'Payé' : 'En cours'}</span></td>
     </tr>`).join('')}</tbody>
   </table>`;
 }
@@ -974,7 +987,7 @@ async function doWithdraw() {
   errEl.textContent = '';
 
   if (!phone)  { errEl.textContent = 'Entrez votre numéro de téléphone.'; return; }
-  if (!amount || amount < 1000) { errEl.textContent = 'Montant minimum : 1 000 FCFA.'; return; }
+  if (!amount || amount < 200) { errEl.textContent = 'Montant minimum : 200 FCFA.'; return; }
   if (amount > (currentProfile.dividends_balance ?? 0)) {
     errEl.textContent = 'Solde insuffisant.'; return;
   }
@@ -996,6 +1009,25 @@ async function doWithdraw() {
   } catch (e) {
     errEl.textContent = 'Erreur réseau.';
   }
+}
+
+// ─── ADMIN TOOLS ───
+async function simulateCredit(amt) {
+  try {
+    const newBal = (currentProfile.dividends_balance || 0) + amt;
+    const { error } = await db.from('profiles').update({ dividends_balance: newBal }).eq('id', currentUser.id);
+    if (error) throw error;
+    toast('Compte crédité ! 1 million FCFA ajoutés pour vos tests.', 'success');
+    await loadProfile();
+  } catch(e) {
+    toast('Erreur de crédit admin : ' + e.message, 'error');
+  }
+}
+
+async function checkAdminStatus() {
+   if (currentUser.email === 'agrilenspaid@proton.me') {
+     document.getElementById('admin-debug').style.display = 'block';
+   }
 }
 
 // ─── HELPERS ───

@@ -2069,3 +2069,31 @@ body {
     font-size: 14px;
   }
 }
+
+/* Specific Small Mobile Fixes */
+@media screen and (max-width: 600px) {
+  .rx-config__title { font-size: 24px !important; }
+  .rx-table-group__title { font-size: 12px; margin-bottom: 20px; }
+  
+  /* Stack Table Rows */
+  .rx-table, .rx-table tbody, .rx-table tr { display: block; width: 100%; }
+  .rx-table tr { margin-bottom: 15px; padding: 15px; border-radius: 12px; }
+  .rx-table td { display: flex; justify-content: space-between; align-items: center; border: none; padding: 8px 0 !important; width: 100% !important; text-align: left !important; }
+  .rx-table td:first-child { font-size: 14px !important; background: rgba(61,139,255,0.05); border-radius: 8px; margin-bottom: 5px; padding: 10px !important; }
+  .rx-table td::before { content: attr(data-label); font-weight: bold; color: var(--text-muted); font-size: 11px; text-transform: uppercase; }
+  .rx-table td:last-child { justify-content: center; background: #fafafa; border-radius: 8px; margin-top: 5px; }
+
+  /* Dashboard Stats Stacking */
+  .stats-row { grid-template-columns: 1fr !important; gap: 15px; }
+  .hero { padding: 30px 20px !important; }
+  .stat-value { font-size: 26px !important; }
+  
+  /* Navigation Fix */
+  .nav { padding: 12px 20px !important; }
+  .nav-logo { font-size: 14px; }
+}
+
+/* Performance: Prevent layout shifts by setting min-height on main sections */
+#dashboard, #auth-screen { min-height: 100vh; }
+.main { contain: content; }
+
