@@ -884,20 +884,19 @@ async function doInvest(projectId, projectName) {
 
     const data = await res.json();
     if (data.redirect_url) {
-      // Sauvegarder l'investissement en attente dans Supabase
       const sharesCount = amount / (project?.price_per_share || 10000);
       await db.from('investments').insert({
         user_id: currentUser.id,
         project_id: projectId,
-        order_id: data.token, // Store PayDunya token as order_id
+        order_id: data.token,
         amount_paid: amount,
         shares_count: sharesCount,
         status: 'pending',
       });
-      // Rediriger vers la page PayDunya
       window.location.href = data.redirect_url;
     } else {
-      toast('Erreur de paiement PayDunya : ' + (data.error || 'Inconnue'), 'error');
+      console.error('PAYMENT ERROR:', data);
+      toast('Erreur PayDunya: ' + (data.error || 'Vérifiez vos clés sur Vercel'), 'error');
     }
   } catch (e) {
     toast('Erreur : ' + e.message, 'error');
