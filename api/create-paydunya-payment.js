@@ -1,3 +1,4 @@
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
@@ -7,22 +8,19 @@ export default async function handler(req, res) {
   const APP_URL = (process.env.APP_URL || 'https://universalfabsn.space').replace(/\/$/, '');
 
   const { amount, projectId, projectName, userId } = req.body;
-  const numAmount = Math.round(parseFloat(amount));
 
-  // PayDunya v1 API Standard Structure (Array based items)
   const invoice = {
     invoice: {
-      total_amount: numAmount,
+      total_amount: amount,
       description: `Investissement dans ${projectName} (Universal Fab)`,
-      items: [
-        {
+      items: {
+        item_0: {
           name: `Action ${projectName}`,
           quantity: 1,
-          unit_price: numAmount,
-          total_price: numAmount,
-          description: `Investissement ID: ${userId}`
+          unit_price: amount,
+          total_price: amount
         }
-      ]
+      }
     },
     store: {
       name: "Universal Fab",
@@ -32,7 +30,7 @@ export default async function handler(req, res) {
       cancel_url: `${APP_URL}/espace-actionnaire.html?payment=cancel`,
       return_url: `${APP_URL}/espace-actionnaire.html?payment=success&project=${projectId}`,
     },
-    custom_data: { userId, projectId, amount: numAmount }
+    custom_data: { userId, projectId, amount }
   };
 
   try {
@@ -42,34 +40,26 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json',
         'X-Paydunya-Master-Key': MASTER_KEY,
         'X-Paydunya-Private-Key': PRIVATE_KEY,
-        'X-Paydunya-Token': TOKEN,
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+        'X-Paydunya-Token': TOKEN
       },
       body: JSON.stringify(invoice)
     });
 
     const bodyText = await pdRes.text();
-    console.log('PAYDUNYA STATUS:', pdRes.status);
-    
+    console.log('RAW PAYDUNYA RESPONSE:', bodyText);
+
     try {
       const data = JSON.parse(bodyText);
-      if (data.response_code === '00' || (data.token && data.response_text === 'Invoice created')) {
+      if (data.response_code === '00') {
         return res.status(200).json({
           token: data.token,
           redirect_url: `https://app.paydunya.com/checkout/invoice/${data.token}`
         });
       } else {
-        return res.status(500).json({ 
-          error: 'Erreur PayDunya: ' + (data.response_text || 'Code ' + data.response_code),
-          detail: data 
-        });
+        return res.status(500).json({ error: 'PayDunya: ' + (data.response_text || bodyText) });
       }
     } catch (e) {
-      return res.status(500).json({ 
-         error: 'PayDunya Crash (HTML)', 
-         status: pdRes.status,
-         response: bodyText.substring(0, 300) 
-      });
+      return res.status(500).json({ error: 'PayDunya return HTML/Non-JSON', response: bodyText.substring(0, 100) });
     }
   } catch (err) {
     return res.status(500).json({ error: 'Internal Error', message: err.message });
