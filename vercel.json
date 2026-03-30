@@ -12,8 +12,11 @@
   ],
   "cleanUrls": true,
   "functions": {
-    "api/create-payment.js": {
-      "regions": ["iad1"]
+    "api/create-paydunya-payment.js": {
+      "regions": ["cdg1"]
+    },
+    "api/paydunya-ipn.js": {
+       "regions": ["cdg1"]
     }
   }
 }
