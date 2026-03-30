@@ -1,150 +1,165 @@
 <!DOCTYPE html>
-  <html lang="en">
-    
-<!-- Mirrored from studio-onto.com/ by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 16 Mar 2026 09:26:56 GMT -->
+<html lang="fr">
 <head>
-      <script async src="../www.googletagmanager.com/gtag/js3b59?id=G-ZT0G87CKQ5"></script>
-      <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
+    <meta charset="utf-8">
+    <title>Universal Fab</title>
+    <meta name="description" content="Universal Fab — La solution locale. Nous travaillons avec nos actionnaires et partenaires pour créer des produits sans pareils">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="theme-color" content="#ffffff">
+    <meta property="og:image" content="we_are_onto.jpg" />
+    <link rel="icon" href="favicon.ico">
 
-        gtag('config', 'G-ZT0G87CKQ5');
-      </script>
-      <meta charset="utf-8">
-        <title>Universal Fab</title>
-
-        <meta name="description" content="ONTO — The Founder Studio. Nous travaillons avec nos actionnaires et partenaires pour créer des produits sans pareils">
-        <meta name="viewport" content="width=device-width,initial-scale=1">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="theme-color" content="#ffffff">
-        <meta property="og:image" content="we_are_onto.jpg" />
-
-        <link rel="icon" href="favicon.ico">
-
-        
+    <!-- Styles -->
     <link href="dist/index.css" rel="stylesheet">
+    
+    <!-- Core Libraries (CDNs) - Required for the site animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://unpkg.com/@barba/core"></script>
+    
+    <!-- Project Scripts -->
     <script defer src="libs/lottie.js"></script>
     <script defer src="dist/index.js"></script>
     <script defer src="js/shared-header.js"></script>
 
-      <script>
-        document.addEventListener('DOMContentLoaded', () => {
-          if (typeof gsap !== 'undefined') {
-            const tl = gsap.timeline();
-            tl.to('#splash-title', { opacity: 1, y: 0, duration: 1, delay: 0.5, ease: 'power2.out' });
-            tl.to('#splash-presente', { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' }, "-=0.3");
-            tl.to('#lariya-simple-splash', { opacity: 0, duration: 1, delay: 1.5, pointerEvents: 'none', onComplete: () => {
-              const el = document.getElementById('lariya-simple-splash');
-              if(el) el.remove();
-            }});
-          }
-        });
-      </script>
+    <style>
+        /* Ensure the splash screen is visible initially and covers everything */
+        #lariya-simple-splash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #111;
+            z-index: 999999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-family: sans-serif;
+            pointer-events: all;
+        }
+    </style>
+</head>
+<body data-barba="wrapper">
 
-      
-
-<header class="header">
-    <h1><a href="index.html" aria-label="Home"><span id="logo-lottie"></span></a></h1>
-    <div class="header__menu">
-        <a href="espace-actionnaire.html" class="nos-produits-bubble actionnaire-btn" data-barba-prevent="self" style="margin-right: 12px; background-color: #3D8BFF !important; border-radius: 50px !important; padding: 10px 22px !important; color: #fff !important; display: inline-flex !important; align-items: center; justify-content: center; font-size: 13px !important; font-weight: bold !important; border:none !important;">
-            <span>ESPACE ACTIONNAIRE</span>
-        </a>
-        <a href="devis-automatique.html" class="nos-produits-bubble return-btn" id="section-toggle" style="background-color: #f1f1f1 !important; color: #111 !important; border: 1px solid #ddd !important; border-radius: 50px !important; padding: 10px 22px !important; display: inline-flex !important; align-items: center; justify-content: center; font-size: 13px !important; font-weight: bold !important;">
-            <span id="section-toggle-text">Nos produits</span>
-        </a>
+    <!-- Splash Screen (Referenced by JS) -->
+    <div id="lariya-simple-splash">
+        <div id="splash-title" style="font-size:32px; letter-spacing:8px; opacity:0; transform:translateY(20px); font-weight:bold; margin-bottom:10px;">UNIVERSAL FAB</div>
+        <div id="splash-presente" style="font-size:14px; letter-spacing:4px; opacity:0; transform:translateY(10px);">présente</div>
     </div>
-</header>
 
-
-
-      <main data-barba="container" data-barba-namespace="home" id="onto-section">
-        <div class="home page">
-          
-          <div id="lottie" style="display:none !important"></div>
-          <div class="home__content">
-            <div class="container">
-              <div class="home__content__head">
-                <p class="design">la solution locale</p>
-                <div class="content">
-                  <h2>Universal Fab</h2>
-                </div>
-                <button type="button" class="home-play">
-                  Fullscreen
-                </button>
-                <button type="button" class="home-switch" aria-label="Switch Theme" title="Switch Theme">
-                  <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M0.349243 8.13518V8.81319H16.6196V8.13518H0.349243Z" fill="#111111"/>
-                    <path d="M0.349243 8.13518V8.81319H16.6196V8.13518H0.349243Z" fill="#111111"/>
-                    <path d="M8.14621 16.6308H8.82422V0.360377H8.14621V16.6308Z" fill="#111111"/>
-                    <path d="M8.14621 16.6308H8.82422V0.360377H8.14621V16.6308Z" fill="#111111"/>
-                  </svg>
-                </button>
-              </div>
-              <div class="home__content__video">
-                <video loop playsinline muted autoplay preload="auto" class="click-sound" style="cursor:pointer; pointer-events:auto; position:relative; z-index:50;">
-                  <source src="video/universal_hero.mp4" type="video/mp4" />
-                </video>
-              </div>
-            </div>
-          </div>
+    <header class="header">
+        <h1><a href="index.html" aria-label="Home"><span id="logo-lottie"></span></a></h1>
+        <div class="header__menu">
+            <a href="espace-actionnaire.html" class="nos-produits-bubble actionnaire-btn" data-barba-prevent="self" style="margin-right: 12px; background-color: #3D8BFF !important; border-radius: 50px !important; padding: 10px 22px !important; color: #fff !important; display: inline-flex !important; align-items: center; justify-content: center; font-size: 13px !important; font-weight: bold !important; border:none !important;">
+                <span>ESPACE ACTIONNAIRE</span>
+            </a>
+            <a href="devis-automatique.html" class="nos-produits-bubble return-btn" id="section-toggle" style="background-color: #f1f1f1 !important; color: #111 !important; border: 1px solid #ddd !important; border-radius: 50px !important; padding: 10px 22px !important; display: inline-flex !important; align-items: center; justify-content: center; font-size: 13px !important; font-weight: bold !important;">
+                <span id="section-toggle-text">Nos produits</span>
+            </a>
         </div>
-      </main>
+    </header>
 
-      <div class="menu">
+    <main data-barba="container" data-barba-namespace="home" id="onto-section">
+        <div class="home page">
+            <div id="lottie" style="display:none !important"></div>
+            <div class="home__content">
+                <div class="container">
+                    <div class="home__content__head">
+                        <p class="design">la solution locale</p>
+                        <div class="content">
+                            <h2>Universal Fab</h2>
+                        </div>
+                        <button type="button" class="home-play">Fullscreen</button>
+                        <button type="button" class="home-switch" aria-label="Switch Theme" title="Switch Theme">
+                            <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M0.349243 8.13518V8.81319H16.6196V8.13518H0.349243Z" fill="#111111"/>
+                                <path d="M0.349243 8.13518V8.81319H16.6196V8.13518H0.349243Z" fill="#111111"/>
+                                <path d="M8.14621 16.6308H8.82422V0.360377H8.14621V16.6308Z" fill="#111111"/>
+                                <path d="M8.14621 16.6308H8.82422V0.360377H8.14621V16.6308Z" fill="#111111"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="home__content__video">
+                        <video loop playsinline muted autoplay preload="auto" class="click-sound" style="cursor:pointer; pointer-events:auto; position:relative; z-index:50;">
+                            <source src="video/universal_hero.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="menu">
         <nav class="navigation">
-          <a href="work.html" class="navigation__item work-item" aria-label="Work" title="Work">
-            <span class="text">
-              <span>Work</span>
-              <span>Home</span>
-              <span>Next Project</span>
-            </span>
-            <span class="arrow bottom">
-              <span></span>
-              <span></span>
-              <span></span>
-              <span></span>
-              <span></span>
-            </span>
-          </a>
+            <a href="work.html" class="navigation__item work-item" aria-label="Work" title="Work">
+                <span class="text">
+                    <span>Work</span>
+                    <span>Home</span>
+                    <span>Next Project</span>
+                </span>
+                <span class="arrow bottom">
+                    <span></span><span></span><span></span><span></span><span></span>
+                </span>
+            </a>
         </nav>
-      </div>
+    </div>
 
-
-
-
-
-      <div class="cursor">
+    <div class="cursor">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0.542847 7.67929V8.30078H15.4571V7.67929H0.542847Z" fill="white"/>
-          <path d="M0.542847 7.67929V8.30078H15.4571V7.67929H0.542847Z" fill="white"/>
-          <path d="M7.6893 15.4668H8.31079V0.552504H7.6893V15.4668Z" fill="white"/>
-          <path d="M7.6893 15.4668H8.31079V0.552504H7.6893V15.4668Z" fill="white"/>
+            <path d="M0.542847 7.67929V8.30078H15.4571V7.67929H0.542847Z" fill="white"/>
+            <path d="M0.542847 7.67929V8.30078H15.4571V7.67929H0.542847Z" fill="white"/>
+            <path d="M7.6893 15.4668H8.31079V0.552504H7.6893V15.4668Z" fill="white"/>
+            <path d="M7.6893 15.4668H8.31079V0.552504H7.6893V15.4668Z" fill="white"/>
         </svg>
         <span>open case study</span>
-      </div>
+    </div>
 
-    
+    <!-- Splash Screen Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM Content Loaded - Initializing GSAP...');
+            if (typeof gsap !== 'undefined') {
+                const tl = gsap.timeline();
+                tl.to('#splash-title', { opacity: 1, y: 0, duration: 1, delay: 0.5, ease: 'power2.out' });
+                tl.to('#splash-presente', { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' }, "-=0.3");
+                tl.to('#lariya-simple-splash', { 
+                    opacity: 0, 
+                    duration: 1, 
+                    delay: 1.5, 
+                    pointerEvents: 'none', 
+                    onComplete: () => {
+                        const el = document.getElementById('lariya-simple-splash');
+                        if(el) el.remove();
+                        console.log('Splash screen removed.');
+                    }
+                });
+            } else {
+                console.warn('GSAP not loaded! Using fallback to remove splash screen.');
+                const el = document.getElementById('lariya-simple-splash');
+                if(el) {
+                    setTimeout(() => {
+                        el.style.opacity = '0';
+                        el.style.pointerEvents = 'none';
+                        setTimeout(() => el.remove(), 1000);
+                    }, 2000);
+                }
+            }
+        });
 
-
-
-<script>
-// Click-to-toggle-sound for videos (uses event delegation for SPA navigation)
-document.addEventListener('DOMContentLoaded', function() {
-  document.body.addEventListener('click', function(e) {
-    var v = e.target.closest('video.click-sound');
-    if (v) {
-      v.muted = !v.muted;
-    }
-  });
-});
-</script>
-
-
-
-
+        // Click-to-toggle-sound for videos
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.addEventListener('click', function(e) {
+                var v = e.target.closest('video.click-sound');
+                if (v) {
+                    v.muted = !v.muted;
+                    console.log('Video muted toggled:', v.muted);
+                }
+            });
+        });
+    </script>
 
 </body>
-
-<!-- Mirrored from studio-onto.com/ by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 16 Mar 2026 09:27:00 GMT -->
 </html>
