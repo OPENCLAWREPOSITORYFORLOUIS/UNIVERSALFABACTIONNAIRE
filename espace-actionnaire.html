@@ -870,17 +870,23 @@ async function doInvest(projectId, projectName) {
   try {
     const project = PROJECTS.find(p => p.id === projectId);
 
-    const res = await fetch('/api/create-payment', {
+    const NABOO_KEY = 'pk_live_naboo_L8ZjXhlaNBuQU6N-_7a-ZMFVGBgaKuuhCJcKAeZy5XM=';
+    const APP_URL = window.location.origin;
+
+    const res = await fetch('https://api.naboopay.com/api/v2/transactions', {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${NABOO_KEY}`,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
       body: JSON.stringify({
-        amount: amount,
-        projectId: projectId,
-        projectName: project?.name || projectName,
-        userId: currentUser.id
+        method_of_payment: ['wave', 'orange_money'],
+        products: [{ name: 'Action Universal Fab', price: amount, quantity: 1 }],
+        success_url: `${APP_URL}/espace-actionnaire.html?payment=success&project=${projectId}`,
+        error_url: `${APP_URL}/espace-actionnaire.html?payment=error`,
+        fees_customer_side: false,
+        is_escrow: false,
       }),
     });
 

@@ -19,35 +19,11 @@
     <script defer src="dist/index.js"></script>
     <script defer src="js/shared-header.js"></script>
 
-    <style>
-        /* Ensure the splash screen is visible initially and covers everything */
-        #lariya-simple-splash {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #111;
-            z-index: 999999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-family: sans-serif;
-            pointer-events: all;
-        }
-    </style>
+    
 </head>
 <body data-barba="wrapper">
 
-    <!-- Splash Screen (Referenced by JS) -->
-    <div id="lariya-simple-splash">
-        <div id="splash-title" style="font-size:32px; letter-spacing:8px; opacity:0; transform:translateY(20px); font-weight:bold; margin-bottom:10px;">UNIVERSAL FAB</div>
-        <div id="splash-presente" style="font-size:14px; letter-spacing:4px; opacity:0; transform:translateY(10px);">présente</div>
-    </div>
-
-    <header class="header">
+        <header class="header">
         <h1><a href="index.html" aria-label="Home"><span id="logo-lottie"></span></a></h1>
         <div class="header__menu">
             <a href="espace-actionnaire.html" class="nos-produits-bubble actionnaire-btn" data-barba-prevent="self" style="margin-right: 12px; background-color: #3D8BFF !important; border-radius: 50px !important; padding: 10px 22px !important; color: #fff !important; display: inline-flex !important; align-items: center; justify-content: center; font-size: 13px !important; font-weight: bold !important; border:none !important;">
@@ -61,7 +37,7 @@
 
     <main data-barba="container" data-barba-namespace="home" id="onto-section">
         <div class="home page">
-            <div id="lottie" style="display:none !important"></div>
+            <div id="lottie"></div>
             <div class="home__content">
                 <div class="container">
                     <div class="home__content__head">
@@ -114,49 +90,7 @@
         <span>open case study</span>
     </div>
 
-    <!-- Splash Screen Logic -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOM Content Loaded - Initializing GSAP...');
-            if (typeof gsap !== 'undefined') {
-                const tl = gsap.timeline();
-                tl.to('#splash-title', { opacity: 1, y: 0, duration: 1, delay: 0.5, ease: 'power2.out' });
-                tl.to('#splash-presente', { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' }, "-=0.3");
-                tl.to('#lariya-simple-splash', { 
-                    opacity: 0, 
-                    duration: 1, 
-                    delay: 1.5, 
-                    pointerEvents: 'none', 
-                    onComplete: () => {
-                        const el = document.getElementById('lariya-simple-splash');
-                        if(el) el.remove();
-                        console.log('Splash screen removed.');
-                    }
-                });
-            } else {
-                console.warn('GSAP not loaded! Using fallback to remove splash screen.');
-                const el = document.getElementById('lariya-simple-splash');
-                if(el) {
-                    setTimeout(() => {
-                        el.style.opacity = '0';
-                        el.style.pointerEvents = 'none';
-                        setTimeout(() => el.remove(), 1000);
-                    }, 2000);
-                }
-            }
-        });
-
-        // Click-to-toggle-sound for videos
-        document.addEventListener('DOMContentLoaded', function() {
-            document.body.addEventListener('click', function(e) {
-                var v = e.target.closest('video.click-sound');
-                if (v) {
-                    v.muted = !v.muted;
-                    console.log('Video muted toggled:', v.muted);
-                }
-            });
-        });
-    </script>
+    
 
 </body>
 </html>
