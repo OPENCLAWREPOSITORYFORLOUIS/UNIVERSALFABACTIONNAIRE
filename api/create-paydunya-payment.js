@@ -13,6 +13,14 @@ export default async function handler(req, res) {
     invoice: {
       total_amount: amount,
       description: `Investissement dans ${projectName} (Universal Fab)`,
+      items: {
+        item_0: {
+          name: `Action ${projectName}`,
+          quantity: 1,
+          unit_price: amount,
+          total_price: amount
+        }
+      }
     },
     store: {
       name: "Universal Fab",
