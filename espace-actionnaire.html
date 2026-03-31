@@ -913,6 +913,7 @@ async function loadMyInvestments() {
   const { data } = await db.from('investments')
     .select('*, projects(name)')
     .eq('user_id', currentUser.id)
+    .eq('status', 'completed') // ONLY show validated payments
     .order('created_at', { ascending: false });
 
   if (!data || data.length === 0) return;
