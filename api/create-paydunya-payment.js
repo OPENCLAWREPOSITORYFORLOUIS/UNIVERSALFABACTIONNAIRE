@@ -8,6 +8,8 @@ export default async function handler(req, res) {
   const APP_URL = (process.env.APP_URL || 'https://universalfabsn.space').replace(/\/$/, '');
 
   const { amount, projectId, projectName, userId } = req.body;
+  const isSandbox = PRIVATE_KEY.startsWith('test_');
+  const baseUrl = isSandbox ? 'https://sandbox.paydunya.com' : 'https://app.paydunya.com';
 
   const invoice = {
     invoice: {
@@ -26,7 +28,7 @@ export default async function handler(req, res) {
   };
 
   try {
-    const pdRes = await fetch('https://app.paydunya.com/api/v1/checkout-invoice/create', {
+    const pdRes = await fetch(`${baseUrl}/api/v1/checkout-invoice/create`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -45,7 +47,7 @@ export default async function handler(req, res) {
       if (data.response_code === '00') {
         return res.status(200).json({
           token: data.token,
-          redirect_url: `https://app.paydunya.com/checkout/invoice/${data.token}`
+          redirect_url: `${baseUrl}/checkout/invoice/${data.token}`
         });
       } else {
         return res.status(500).json({ error: 'PayDunya: ' + (data.response_text || bodyText) });

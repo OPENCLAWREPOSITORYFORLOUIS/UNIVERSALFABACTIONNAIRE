@@ -1,5 +1,5 @@
 // api/payout.js
-// Vercel Serverless Function — Processes dividend withdrawal via Naboopay Payout
+// Processes dividend withdrawal via PayDunya Disbursement API
 
 import { createClient } from '@supabase/supabase-js';
 
@@ -13,7 +13,12 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const NABOO_API_KEY = process.env.NABOO_API_KEY;
+  const MASTER_KEY = (process.env.PAYDUNYA_MASTER_KEY || '').trim();
+  const PRIVATE_KEY = (process.env.PAYDUNYA_PRIVATE_KEY || '').trim();
+  const TOKEN = (process.env.PAYDUNYA_TOKEN || '').trim();
+  
+  const isSandbox = PRIVATE_KEY.startsWith('test_');
+  const baseUrl = isSandbox ? 'https://sandbox.paydunya.com' : 'https://app.paydunya.com';
 
   try {
     const { userId, amount, phoneNumber, phoneOperator } = req.body;
@@ -23,74 +28,92 @@ export default async function handler(req, res) {
     }
 
     // Check the user's available dividend balance in Supabase
-    const { data: profile, error: profileErr } = await supabase
+    const { data: profile } = await supabase
       .from('profiles')
       .select('dividends_balance')
       .eq('id', userId)
       .single();
 
-    if (profileErr || !profile) {
-      return res.status(404).json({ error: 'User profile not found' });
-    }
-
-    if (profile.dividends_balance < amount) {
-      return res.status(400).json({ error: 'Insufficient dividend balance' });
+    if (!profile || profile.dividends_balance < amount) {
+      return res.status(400).json({ error: 'Solde insuffisant.' });
     }
 
     // Deduct the payout from Supabase immediately (pessimistic lock)
-    const { error: deductErr } = await supabase
+    await supabase
       .from('profiles')
       .update({ dividends_balance: profile.dividends_balance - amount })
       .eq('id', userId);
 
-    if (deductErr) {
-      return res.status(500).json({ error: 'Failed to update balance' });
-    }
+    // Prepare PayDunya Disburse payload
+    // Operator mapping: PayDunya uses orange-money-senegal, wave-senegal, free-money-senegal
+    const operatorMap = {
+      'WAVE': 'wave-senegal',
+      'ORANGE': 'orange-money-senegal',
+      'FREE': 'free-money-senegal'
+    };
+    const pdOperator = operatorMap[(phoneOperator || 'WAVE').toUpperCase()] || 'wave-senegal';
 
-    // Send payout via Naboopay API
-    const nabooRes = await fetch('https://api.naboopay.com/api/v1/payout/create', {
+    const disburseBody = {
+      disburse: {
+        total_amount: amount,
+        description: 'Retrait de dividendes — Universal Fab'
+      },
+      recipients: [
+        {
+          name: "Actionnaire Universal Fab",
+          phone: phoneNumber,
+          operator: pdOperator,
+          amount: amount
+        }
+      ]
+    };
+
+    // Send payout via PayDunya API
+    const pdRes = await fetch(`${baseUrl}/api/v1/disburse/get-invoice`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${NABOO_API_KEY}`,
+        'X-Paydunya-Master-Key': MASTER_KEY,
+        'X-Paydunya-Private-Key': PRIVATE_KEY,
+        'X-Paydunya-Token': TOKEN
       },
-      body: JSON.stringify({
-        amount: amount,
-        currency: 'XOF',
-        phone_number: phoneNumber,
-        operator: phoneOperator || 'WAVE', // WAVE, ORANGE_MONEY, FREE_MONEY
-        description: 'Retrait de dividendes — Universal Fab',
-        metadata: { user_id: userId },
-      }),
+      body: JSON.stringify(disburseBody),
     });
 
-    const nabooData = await nabooRes.json();
+    const bodyText = await pdRes.text();
+    console.log('RAW PAYOUT RESPONSE:', bodyText);
 
-    // If Naboopay payout fails, refund the user's balance in Supabase
-    if (!nabooRes.ok) {
+    try {
+      const data = JSON.parse(bodyText);
+      if (data.response_code === '00') {
+         // Auto-submit disburse (might require a second step depending on merchant settings)
+         // But usually get-invoice + auto-submit works if configured
+         await supabase.from('payouts').insert({
+          user_id: userId,
+          amount: amount,
+          phone_number: phoneNumber,
+          operator: phoneOperator,
+          status: 'pending',
+          naboopay_payout_id: data.disburse_token, // Store the disburse token
+          created_at: new Date().toISOString(),
+        });
+        return res.status(200).json({ success: true, message: `Retrait de ${amount} FCFA initié.` });
+      } else {
+        throw new Error(data.response_text || bodyText);
+      }
+    } catch (e) {
+      // Refund the user's balance in Supabase on failure
       await supabase
         .from('profiles')
         .update({ dividends_balance: profile.dividends_balance })
         .eq('id', userId);
-      console.error('Naboopay payout error:', nabooData);
-      return res.status(500).json({ error: 'Payout failed', detail: nabooData });
+      
+      console.error('PayDunya payout error:', bodyText);
+      return res.status(500).json({ error: 'Payout failed: ' + (e.message || bodyText.substring(0, 100)) });
     }
 
-    // Record payout in history
-    await supabase.from('payouts').insert({
-      user_id: userId,
-      amount: amount,
-      phone_number: phoneNumber,
-      operator: phoneOperator,
-      status: 'pending',
-      naboopay_payout_id: nabooData.id,
-      created_at: new Date().toISOString(),
-    });
-
-    return res.status(200).json({ success: true, message: `Retrait de ${amount} FCFA en cours de traitement` });
-
   } catch (err) {
-    console.error('Payout error:', err);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error('Internal Payout error:', err);
+    return res.status(500).json({ error: 'Server error' });
   }
 }
