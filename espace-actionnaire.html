@@ -9,26 +9,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0A192F;
-    --bg2: #112240;
-    --surface: rgba(100, 255, 218, 0.05);
-    --surface-hover: rgba(100, 255, 218, 0.1);
-    --border: rgba(100, 255, 218, 0.1);
-    --accent: #64FFDA; /* Cyan for visibility on blue */
-    --accent-blue: #3D8BFF;
-    --accent2: #00D2FF;
-    --gold: #FFD700;
-    --success: #22C97A;
-    --danger: #FF5B5B;
-    --text: #CCD6F6;
-    --text-white: #FFFFFF;
-    --muted: #8892B0;
+    --bg: #050a18;
+    --bg2: #0a1428;
+    --surface: rgba(61, 139, 255, 0.08);
+    --surface-hover: rgba(61, 139, 255, 0.15);
+    --border: rgba(61, 139, 255, 0.2);
+    --accent: #3D8BFF;
+    --accent2: #60A5FF;
+    --gold: #FFC107;
+    --success: #00E676;
+    --danger: #FF5252;
+    --text: #FFFFFF;
+    --muted: #B0C4DE;
     --font: 'Inter', sans-serif;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   body {
-    background: radial-gradient(circle at top right, #1a2a6c, #0A192F);
+    background: var(--bg);
     color: var(--text);
     font-family: var(--font);
     min-height: 100vh;
@@ -140,11 +138,11 @@
     position: absolute; top: 0; left: 0; right: 0; height: 1px;
     background: linear-gradient(90deg, transparent, rgba(61,139,255,0.3), transparent);
   }
-  .stat-label { font-size: 13px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; }
-  .stat-value { font-size: 36px; font-weight: 900; line-height: 1; color: var(--text-white); }
+  .stat-label { font-size: 12px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .stat-value { font-size: 32px; font-weight: 800; line-height: 1; }
   .stat-value.gold { color: var(--gold); }
   .stat-value.blue { color: var(--accent); }
-  .stat-sub { font-size: 13px; font-weight: 500; color: var(--muted); margin-top: 8px; }
+  .stat-sub { font-size: 12px; color: var(--muted); margin-top: 8px; }
 
   /* Main Content Layout */
   .main { max-width: 1100px; margin: 0 auto; padding: 40px 32px; display: grid; gap: 32px; }
@@ -375,17 +373,12 @@
   <div class="hero">
     <p class="hero-label">Mon Portefeuille</p>
     <div class="stats-row">
-      <div class="stat-card">
-        <p class="stat-label">Actions Totales</p>
-        <div class="stat-value blue" id="stat-shares">—</div>
-        <p class="stat-sub">Réparties sur vos projets</p>
+      <div class="stat-card" style="border-left: 4px solid var(--accent);">
+        <p class="stat-label">Somme Totale Investie</p>
+        <div class="stat-value blue" id="stat-invested">—</div>
+        <p class="stat-sub">Capital sécurisé sur Universal Fab</p>
       </div>
-      <div class="stat-card">
-        <p class="stat-label">Capital Investi</p>
-        <div class="stat-value" id="stat-invested">—</div>
-        <p class="stat-sub">En francs CFA (XOF)</p>
-      </div>
-      <div class="stat-card">
+      <div class="stat-card" style="border-left: 4px solid var(--gold);">
         <p class="stat-label">Dividendes Disponibles</p>
         <div class="stat-value gold" id="stat-dividends">—</div>
         <p class="stat-sub">Retirables maintenant</p>
@@ -777,13 +770,11 @@ async function loadProfile() {
   const { data } = await db.from('profiles').select('*').eq('id', currentUser.id).single();
   if (data) currentProfile = data;
 
-  const shares    = formatNum(currentProfile.total_shares_count ?? 0, 2);
   const invested  = formatCFA(currentProfile.total_invested ?? 0);
   const dividends = formatCFA(currentProfile.dividends_balance ?? 0);
 
-  document.getElementById('stat-shares').textContent        = shares + ' Actions';
-  document.getElementById('stat-invested').textContent      = invested;
-  document.getElementById('stat-dividends').textContent     = dividends;
+  if (document.getElementById('stat-invested')) document.getElementById('stat-invested').textContent = invested;
+  if (document.getElementById('stat-dividends')) document.getElementById('stat-dividends').textContent = dividends;
   document.getElementById('withdraw-balance').textContent   = dividends;
 
   // Update perks unlocking
@@ -938,7 +929,6 @@ async function loadMyInvestments() {
         <div class="my-inv-name">${g.name}</div>
         <div class="my-inv-detail">Investi : ${formatCFA(g.invested)}</div>
       </div>
-      <div class="my-inv-shares">${formatNum(g.shares, 4)} Actions</div>
     </div>`).join('');
 }
 
@@ -1011,7 +1001,6 @@ function formatCFA(n) {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', minimumFractionDigits: 0 }).format(n);
 }
 function formatNum(n, dec = 0) {
-  if (n === undefined || n === null || isNaN(n)) return '0';
   return parseFloat(n).toFixed(dec).replace(/\.?0+$/, '');
 }
 function toast(msg, type = 'success') {
