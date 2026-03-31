@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Espace Actionnaire — Universal Fab</title>
 <link rel="icon" href="favicon.ico">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -297,12 +297,12 @@
 
     
     <!-- Core Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://unpkg.com/@barba/core"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script defer src="https://unpkg.com/@barba/core"></script>
     
     <!-- Project Scripts -->
     <link href="dist/index.css" rel="stylesheet">
-    <script defer src="libs/lottie.js"></script>
+    
     <script defer src="dist/index.js"></script>
     <script defer src="js/shared-header.js"></script>
 </head>
@@ -532,13 +532,6 @@
       </div>
     </section>
 
-    <!-- ─── DEBUG ADMIN (Solo pour tests) ─── -->
-    <section id="admin-debug" style="display:none; border: 2px dashed var(--gold); border-radius: 20px; padding: 28px; margin-top: 40px; margin-bottom: 32px;">
-      <div style="color:var(--gold); font-weight:900; margin-bottom:12px;">🛠️ MODE DÉVELOPPEUR</div>
-      <p style="font-size:12px; margin-bottom:16px;">Ce menu n'est visible que pour votre compte de test. Utilisez-le pour créditer votre solde et tester les retraits.</p>
-      <button class="btn btn-gold btn-sm" onclick="simulateCredit(1000000)">+ Créditer 1 000 000 FCFA</button>
-    </section>
-
     <!-- ─── COMMUNAUTÉ WHATSAPP ─── -->
     <section>
       <a href="https://chat.whatsapp.com/LJ5ao94sDYPDyYzVsqU49r" target="_blank"
@@ -575,9 +568,9 @@ const PROJECTS = [
     name: 'Universal Fab (Entreprise globale)',
     description: 'Investissement et achat d\'actions dans l\'entreprise Universal Fab (maison mère).',
     emoji: '🏭',
-    price_per_share: 2000,
-    min_shares: 5,
-    target_shares: 50000,
+    price_per_share: 2000, // 10k = 5 actions so 1 action = 2000 CFA
+    min_shares: 5,         // 5 actions * 2000 = 10,000 CFA min.
+    target_shares: 25000,
     sold_shares: 0,
     status: 'Ouvert',
     roi: '',
@@ -589,7 +582,7 @@ const PROJECTS = [
     emoji: '🍽️',
     price_per_share: 2000,
     min_shares: 5,
-    target_shares: 5000,
+    target_shares: 2500,
     sold_shares: 0,
     status: 'Ouvert',
     roi: '',
@@ -625,12 +618,12 @@ window.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   if (params.get('payment') === 'success') {
     toast('Paiement reçu ! Vos actions seront attribuées dans quelques instants.', 'success');
+    // Force refresh profile and investments after a small delay to allow webhook processing
+    setTimeout(async () => {
+      await loadProfile();
+      await loadMyInvestments();
+    }, 2000);
     window.history.replaceState({}, '', window.location.pathname);
-    // Auto-refresh profile after a short delay to allow IPN to process
-    setTimeout(() => {
-      loadProfile();
-      loadMyInvestments();
-    }, 3000);
   }
   if (params.get('payment') === 'error') {
     toast('Le paiement a été annulé ou a échoué.', 'error');
@@ -776,7 +769,6 @@ async function enterDashboard() {
   renderProjects();
   await loadMyInvestments();
   await loadPayoutHistory();
-  await checkAdminStatus();
 }
 
 async function loadProfile() {
@@ -965,10 +957,10 @@ async function loadPayoutHistory() {
       <th>Date</th><th>Montant</th><th>Operateur</th><th>Statut</th>
     </tr></thead>
     <tbody>${data.map(p => `<tr>
-      <td data-label="Date">${new Date(p.created_at).toLocaleDateString('fr-FR')}</td>
-      <td data-label="Montant">${formatCFA(p.amount)}</td>
-      <td data-label="Opérateur">${p.operator || '—'}</td>
-      <td data-label="Statut"><span class="status-pill ${p.status === 'paid' ? 'pill-paid' : 'pill-pending'}">${p.status === 'paid' ? 'Payé' : 'En cours'}</span></td>
+      <td>${new Date(p.created_at).toLocaleDateString('fr-FR')}</td>
+      <td>${formatCFA(p.amount)}</td>
+      <td>${p.operator || '—'}</td>
+      <td><span class="status-pill ${p.status === 'paid' ? 'pill-paid' : 'pill-pending'}">${p.status === 'paid' ? 'Payé' : 'En cours'}</span></td>
     </tr>`).join('')}</tbody>
   </table>`;
 }
@@ -1009,25 +1001,6 @@ async function doWithdraw() {
   } catch (e) {
     errEl.textContent = 'Erreur réseau.';
   }
-}
-
-// ─── ADMIN TOOLS ───
-async function simulateCredit(amt) {
-  try {
-    const newBal = (currentProfile.dividends_balance || 0) + amt;
-    const { error } = await db.from('profiles').update({ dividends_balance: newBal }).eq('id', currentUser.id);
-    if (error) throw error;
-    toast('Compte crédité ! 1 million FCFA ajoutés pour vos tests.', 'success');
-    await loadProfile();
-  } catch(e) {
-    toast('Erreur de crédit admin : ' + e.message, 'error');
-  }
-}
-
-async function checkAdminStatus() {
-   if (currentUser.email === 'agrilenspaid@proton.me') {
-     document.getElementById('admin-debug').style.display = 'block';
-   }
 }
 
 // ─── HELPERS ───

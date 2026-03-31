@@ -41,12 +41,7 @@ table {
   border-collapse: collapse;
   border-spacing: 0; }
 
-@font-face {
-  font-family: 'SaansMediumItalic';
-  src: url("SaansTRIAL-MediumItalic.e6760046.woff2") format("woff2"), url("SaansTRIAL-MediumItalic.781a7173.woff") format("woff");
-  font-weight: 500;
-  font-style: italic;
-  font-display: swap; }
+
 
 @font-face {
   font-family: 'SaansMedium';
@@ -62,47 +57,17 @@ table {
   font-style: normal;
   font-display: swap; }
 
-@font-face {
-  font-family: 'SaansItalic';
-  src: url("SaansTRIAL-RegularItalic.0a5815b2.woff2") format("woff2"), url("SaansTRIAL-RegularItalic.04cd5071.woff") format("woff");
-  font-weight: normal;
-  font-style: italic;
-  font-display: swap; }
 
-@font-face {
-  font-family: 'SaansBold';
-  src: url("SaansTRIAL-Bold.c1e16c99.woff2") format("woff2"), url("SaansTRIAL-Bold.dae9c566.woff") format("woff");
-  font-weight: bold;
-  font-style: normal;
-  font-display: swap; }
 
-@font-face {
-  font-family: 'SaansLight';
-  src: url("SaansTRIAL-Light.049d79db.woff2") format("woff2"), url("SaansTRIAL-Light.9033f110.woff") format("woff");
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap; }
 
-@font-face {
-  font-family: 'SaansBoldItalic';
-  src: url("SaansTRIAL-BoldItalic.3db2bc72.woff2") format("woff2"), url("SaansTRIAL-BoldItalic.e51cf447.woff") format("woff");
-  font-weight: bold;
-  font-style: italic;
-  font-display: swap; }
 
-@font-face {
-  font-family: 'Alfredino';
-  src: url("TRIALAlfredinoSemimono-Semimono.feb8af50.woff2") format("woff2"), url("TRIALAlfredinoSemimono-Semimono.9b9cd585.woff") format("woff");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap; }
 
-@font-face {
-  font-family: 'NTBauMono';
-  src: url("NTBauMono-Regular.eb803944.woff2") format("woff2"), url("NTBauMono-Regular.921d708c.woff") format("woff");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap; }
+
+
+
+
+
+
 
 @font-face {
   font-family: 'Review';
@@ -2069,31 +2034,3 @@ body {
     font-size: 14px;
   }
 }
-
-/* Specific Small Mobile Fixes */
-@media screen and (max-width: 600px) {
-  .rx-config__title { font-size: 24px !important; }
-  .rx-table-group__title { font-size: 12px; margin-bottom: 20px; }
-  
-  /* Stack Table Rows */
-  .rx-table, .rx-table tbody, .rx-table tr { display: block; width: 100%; }
-  .rx-table tr { margin-bottom: 15px; padding: 15px; border-radius: 12px; }
-  .rx-table td { display: flex; justify-content: space-between; align-items: center; border: none; padding: 8px 0 !important; width: 100% !important; text-align: left !important; }
-  .rx-table td:first-child { font-size: 14px !important; background: rgba(61,139,255,0.05); border-radius: 8px; margin-bottom: 5px; padding: 10px !important; }
-  .rx-table td::before { content: attr(data-label); font-weight: bold; color: var(--text-muted); font-size: 11px; text-transform: uppercase; }
-  .rx-table td:last-child { justify-content: center; background: #fafafa; border-radius: 8px; margin-top: 5px; }
-
-  /* Dashboard Stats Stacking */
-  .stats-row { grid-template-columns: 1fr !important; gap: 15px; }
-  .hero { padding: 30px 20px !important; }
-  .stat-value { font-size: 26px !important; }
-  
-  /* Navigation Fix */
-  .nav { padding: 12px 20px !important; }
-  .nav-logo { font-size: 14px; }
-}
-
-/* Performance: Prevent layout shifts by setting min-height on main sections */
-#dashboard, #auth-screen { min-height: 100vh; }
-.main { contain: content; }
-
