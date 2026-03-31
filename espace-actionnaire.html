@@ -5,22 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Espace Actionnaire — Universal Fab</title>
 <link rel="icon" href="favicon.ico">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #050a18;
-    --bg2: #0a1428;
-    --surface: rgba(61, 139, 255, 0.08);
-    --surface-hover: rgba(61, 139, 255, 0.15);
-    --border: rgba(61, 139, 255, 0.2);
+    --bg: #090E1A;
+    --bg2: #0E1624;
+    --surface: rgba(255,255,255,0.04);
+    --surface-hover: rgba(255,255,255,0.08);
+    --border: rgba(255,255,255,0.08);
     --accent: #3D8BFF;
-    --accent2: #60A5FF;
-    --gold: #FFC107;
-    --success: #00E676;
-    --danger: #FF5252;
-    --text: #FFFFFF;
-    --muted: #B0C4DE;
+    --accent2: #7B5EFF;
+    --gold: #F5B731;
+    --success: #22C97A;
+    --danger: #FF5B5B;
+    --text: #E8EDF8;
+    --muted: rgba(232,237,248,0.45);
     --font: 'Inter', sans-serif;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -297,8 +297,8 @@
 
     
     <!-- Core Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://unpkg.com/@barba/core"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script defer src="https://unpkg.com/@barba/core"></script>
     
     <!-- Project Scripts -->
     <link href="dist/index.css" rel="stylesheet">
@@ -373,12 +373,17 @@
   <div class="hero">
     <p class="hero-label">Mon Portefeuille</p>
     <div class="stats-row">
-      <div class="stat-card" style="border-left: 4px solid var(--accent);">
-        <p class="stat-label">Somme Totale Investie</p>
-        <div class="stat-value blue" id="stat-invested">—</div>
-        <p class="stat-sub">Capital sécurisé sur Universal Fab</p>
+      <div class="stat-card">
+        <p class="stat-label">Actions Totales</p>
+        <div class="stat-value blue" id="stat-shares">—</div>
+        <p class="stat-sub">Réparties sur vos projets</p>
       </div>
-      <div class="stat-card" style="border-left: 4px solid var(--gold);">
+      <div class="stat-card">
+        <p class="stat-label">Capital Investi</p>
+        <div class="stat-value" id="stat-invested">—</div>
+        <p class="stat-sub">En francs CFA (XOF)</p>
+      </div>
+      <div class="stat-card">
         <p class="stat-label">Dividendes Disponibles</p>
         <div class="stat-value gold" id="stat-dividends">—</div>
         <p class="stat-sub">Retirables maintenant</p>
@@ -770,11 +775,13 @@ async function loadProfile() {
   const { data } = await db.from('profiles').select('*').eq('id', currentUser.id).single();
   if (data) currentProfile = data;
 
+  const shares    = formatNum(currentProfile.total_shares_count ?? 0, 2);
   const invested  = formatCFA(currentProfile.total_invested ?? 0);
   const dividends = formatCFA(currentProfile.dividends_balance ?? 0);
 
-  if (document.getElementById('stat-invested')) document.getElementById('stat-invested').textContent = invested;
-  if (document.getElementById('stat-dividends')) document.getElementById('stat-dividends').textContent = dividends;
+  document.getElementById('stat-shares').textContent        = shares + ' Actions';
+  document.getElementById('stat-invested').textContent      = invested;
+  document.getElementById('stat-dividends').textContent     = dividends;
   document.getElementById('withdraw-balance').textContent   = dividends;
 
   // Update perks unlocking
@@ -906,7 +913,6 @@ async function loadMyInvestments() {
   const { data } = await db.from('investments')
     .select('*, projects(name)')
     .eq('user_id', currentUser.id)
-    .eq('status', 'completed') // ONLY show validated payments
     .order('created_at', { ascending: false });
 
   if (!data || data.length === 0) return;
@@ -929,6 +935,7 @@ async function loadMyInvestments() {
         <div class="my-inv-name">${g.name}</div>
         <div class="my-inv-detail">Investi : ${formatCFA(g.invested)}</div>
       </div>
+      <div class="my-inv-shares">${formatNum(g.shares, 4)} Actions</div>
     </div>`).join('');
 }
 
