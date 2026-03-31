@@ -1,5 +1,5 @@
 // api/payout.js
-// Processes dividend withdrawal via PayDunya Disbursement API
+// Processes dividend withdrawal via PayDunya Disbursement API (v2)
 
 import { createClient } from '@supabase/supabase-js';
 
@@ -9,43 +9,23 @@ const supabase = createClient(
 );
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
+  if (req.method !== 'POST') return res.status(405).end();
 
   const MASTER_KEY = (process.env.PAYDUNYA_MASTER_KEY || '').trim();
   const PRIVATE_KEY = (process.env.PAYDUNYA_PRIVATE_KEY || '').trim();
   const TOKEN = (process.env.PAYDUNYA_TOKEN || '').trim();
+  const APP_URL = (process.env.APP_URL || 'https://universalfabsn.space').replace(/\/$/, '');
   
   const isSandbox = PRIVATE_KEY.startsWith('test_');
-  const baseUrl = isSandbox ? 'https://sandbox.paydunya.com' : 'https://app.paydunya.com';
+  const baseUrl = isSandbox ? 'https://app.paydunya.com/sandbox-api/v2' : 'https://app.paydunya.com/api/v2';
 
   try {
     const { userId, amount, phoneNumber, phoneOperator } = req.body;
 
-    if (!userId || !amount || !phoneNumber) {
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
+    // Format phone: remove country code and spaces (ex: +221 77... -> 77...)
+    const cleanPhone = phoneNumber.replace(/^\+221/, '').replace(/\s/g, '');
 
-    // Check the user's available dividend balance in Supabase
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('dividends_balance')
-      .eq('id', userId)
-      .single();
-
-    if (!profile || profile.dividends_balance < amount) {
-      return res.status(400).json({ error: 'Solde insuffisant.' });
-    }
-
-    // Deduct the payout from Supabase immediately (pessimistic lock)
-    await supabase
-      .from('profiles')
-      .update({ dividends_balance: profile.dividends_balance - amount })
-      .eq('id', userId);
-
-    // Prepare PayDunya Disburse payload
-    // Operator mapping: PayDunya uses orange-money-senegal, wave-senegal, free-money-senegal
+    // Map operators
     const operatorMap = {
       'WAVE': 'wave-senegal',
       'ORANGE': 'orange-money-senegal',
@@ -53,67 +33,75 @@ export default async function handler(req, res) {
     };
     const pdOperator = operatorMap[(phoneOperator || 'WAVE').toUpperCase()] || 'wave-senegal';
 
-    const disburseBody = {
-      disburse: {
-        total_amount: amount,
-        description: 'Retrait de dividendes — Universal Fab'
-      },
-      recipients: [
-        {
-          name: "Actionnaire Universal Fab",
-          phone: phoneNumber,
-          operator: pdOperator,
-          amount: amount
-        }
-      ]
+    // 1. Fetch profile to check balance
+    const { data: profile } = await supabase.from('profiles').select('dividends_balance').eq('id', userId).single();
+    if (!profile || profile.dividends_balance < amount) return res.status(400).json({ error: 'Solde insuffisant.' });
+
+    // Step 1: Get Disburse Invoice
+    const disbursePayload = {
+      account_alias: cleanPhone,
+      amount: amount,
+      withdraw_mode: pdOperator,
+      callback_url: `${APP_URL}/api/paydunya-ipn`
     };
 
-    // Send payout via PayDunya API
-    const pdRes = await fetch(`${baseUrl}/api/v1/disburse/get-invoice`, {
+    const initRes = await fetch(`${baseUrl}/disburse/get-invoice`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Paydunya-Master-Key': MASTER_KEY,
-        'X-Paydunya-Private-Key': PRIVATE_KEY,
-        'X-Paydunya-Token': TOKEN
+        'PAYDUNYA-MASTER-KEY': MASTER_KEY,
+        'PAYDUNYA-PRIVATE-KEY': PRIVATE_KEY,
+        'PAYDUNYA-TOKEN': TOKEN
       },
-      body: JSON.stringify(disburseBody),
+      body: JSON.stringify(disbursePayload)
     });
 
-    const bodyText = await pdRes.text();
-    console.log('RAW PAYOUT RESPONSE:', bodyText);
+    const initData = await initRes.json();
+    console.log('DISBURSE INIT RESPONSE:', initData);
 
-    try {
-      const data = JSON.parse(bodyText);
-      if (data.response_code === '00') {
-         // Auto-submit disburse (might require a second step depending on merchant settings)
-         // But usually get-invoice + auto-submit works if configured
-         await supabase.from('payouts').insert({
-          user_id: userId,
-          amount: amount,
-          phone_number: phoneNumber,
-          operator: phoneOperator,
-          status: 'pending',
-          naboopay_payout_id: data.disburse_token, // Store the disburse token
-          created_at: new Date().toISOString(),
-        });
-        return res.status(200).json({ success: true, message: `Retrait de ${amount} FCFA initié.` });
-      } else {
-        throw new Error(data.response_text || bodyText);
-      }
-    } catch (e) {
-      // Refund the user's balance in Supabase on failure
-      await supabase
-        .from('profiles')
-        .update({ dividends_balance: profile.dividends_balance })
-        .eq('id', userId);
+    if (initData.response_code !== '00') {
+      return res.status(500).json({ error: 'PayDunya Init: ' + (initData.response_text || 'Error') });
+    }
+
+    const disburseToken = initData.disburse_token;
+
+    // Step 2: Submit Disburse Invoice
+    const submitRes = await fetch(`${baseUrl}/disburse/submit-invoice`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'PAYDUNYA-MASTER-KEY': MASTER_KEY,
+        'PAYDUNYA-PRIVATE-KEY': PRIVATE_KEY,
+        'PAYDUNYA-TOKEN': TOKEN
+      },
+      body: JSON.stringify({ disburse_invoice: disburseToken })
+    });
+
+    const submitData = await submitRes.json();
+    console.log('DISBURSE SUBMIT RESPONSE:', submitData);
+
+    if (submitData.response_code === '00') {
+      // Deduct from balance
+      await supabase.from('profiles').update({ dividends_balance: profile.dividends_balance - amount }).eq('id', userId);
       
-      console.error('PayDunya payout error:', bodyText);
-      return res.status(500).json({ error: 'Payout failed: ' + (e.message || bodyText.substring(0, 100)) });
+      // Record history
+      await supabase.from('payouts').insert({
+        user_id: userId,
+        amount: amount,
+        phone_number: cleanPhone,
+        operator: phoneOperator,
+        status: 'pending',
+        naboopay_payout_id: disburseToken,
+        created_at: new Date().toISOString(),
+      });
+
+      return res.status(200).json({ success: true, message: 'Transfert initié avec succès !' });
+    } else {
+       return res.status(500).json({ error: 'PayDunya Submit: ' + (submitData.response_text || 'Error') });
     }
 
   } catch (err) {
-    console.error('Internal Payout error:', err);
-    return res.status(500).json({ error: 'Server error' });
+    console.error('Payout Internal Error:', err);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
