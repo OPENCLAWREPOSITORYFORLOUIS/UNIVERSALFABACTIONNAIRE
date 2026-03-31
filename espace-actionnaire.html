@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- VERCEL_FORCE_REDEPLOY_UI_BLUE_777 -->
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -9,24 +9,26 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #060B16;
-    --bg2: #0B172D;
-    --surface: rgba(61,139,255,0.06);
-    --surface-hover: rgba(61,139,255,0.12);
-    --border: rgba(61,139,255,0.15);
-    --accent: #00D2FF;
-    --accent2: #3D8BFF;
-    --gold: #FFB800;
-    --success: #00FF94;
-    --danger: #FF4D4D;
-    --text: #FFFFFF;
-    --muted: rgba(255,255,255,0.6);
+    --bg: #0A192F;
+    --bg2: #112240;
+    --surface: rgba(100, 255, 218, 0.05);
+    --surface-hover: rgba(100, 255, 218, 0.1);
+    --border: rgba(100, 255, 218, 0.1);
+    --accent: #64FFDA; /* Cyan for visibility on blue */
+    --accent-blue: #3D8BFF;
+    --accent2: #00D2FF;
+    --gold: #FFD700;
+    --success: #22C97A;
+    --danger: #FF5B5B;
+    --text: #CCD6F6;
+    --text-white: #FFFFFF;
+    --muted: #8892B0;
     --font: 'Inter', sans-serif;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   body {
-    background: var(--bg);
+    background: radial-gradient(circle at top right, #1a2a6c, #0A192F);
     color: var(--text);
     font-family: var(--font);
     min-height: 100vh;
@@ -70,7 +72,7 @@
     text-transform: uppercase; margin-bottom: 36px;
   }
   .auth-logo .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
-  .auth-title { font-size: 26px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+  .auth-title { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
   .auth-sub { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
   .form-group { margin-bottom: 16px; }
   .form-group label { display: block; font-size: 12px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
@@ -112,7 +114,7 @@
     backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border);
   }
-  .nav-logo { font-size: 16px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: var(--text); }
+  .nav-logo { font-size: 16px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; }
   .nav-logo span { color: var(--accent); }
   .nav-right { display: flex; align-items: center; gap: 16px; }
   .nav-user { font-size: 13px; color: var(--muted); }
@@ -138,11 +140,11 @@
     position: absolute; top: 0; left: 0; right: 0; height: 1px;
     background: linear-gradient(90deg, transparent, rgba(61,139,255,0.3), transparent);
   }
-  .stat-label { font-size: 12px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
-  .stat-value { font-size: 32px; font-weight: 800; line-height: 1; }
+  .stat-label { font-size: 13px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; }
+  .stat-value { font-size: 36px; font-weight: 900; line-height: 1; color: var(--text-white); }
   .stat-value.gold { color: var(--gold); }
   .stat-value.blue { color: var(--accent); }
-  .stat-sub { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .stat-sub { font-size: 13px; font-weight: 500; color: var(--muted); margin-top: 8px; }
 
   /* Main Content Layout */
   .main { max-width: 1100px; margin: 0 auto; padding: 40px 32px; display: grid; gap: 32px; }
@@ -154,7 +156,7 @@
   .icon-blue { background: rgba(61,139,255,0.15); }
   .icon-purple { background: rgba(123,94,255,0.15); }
   .icon-green { background: rgba(34,201,122,0.15); }
-  .section-title { font-size: 18px; font-weight: 700; color: var(--text); }
+  .section-title { font-size: 18px; font-weight: 700; }
 
   /* Perks */
   .perks-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
@@ -775,9 +777,9 @@ async function loadProfile() {
   const { data } = await db.from('profiles').select('*').eq('id', currentUser.id).single();
   if (data) currentProfile = data;
 
-  const shares    = formatNum(currentProfile?.total_shares_count || 0, 2);
-  const invested  = formatCFA(currentProfile?.total_invested || 0);
-  const dividends = formatCFA(currentProfile?.dividends_balance || 0);
+  const shares    = formatNum(currentProfile.total_shares_count ?? 0, 2);
+  const invested  = formatCFA(currentProfile.total_invested ?? 0);
+  const dividends = formatCFA(currentProfile.dividends_balance ?? 0);
 
   document.getElementById('stat-shares').textContent        = shares + ' Actions';
   document.getElementById('stat-invested').textContent      = invested;
@@ -1009,6 +1011,7 @@ function formatCFA(n) {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', minimumFractionDigits: 0 }).format(n);
 }
 function formatNum(n, dec = 0) {
+  if (n === undefined || n === null || isNaN(n)) return '0';
   return parseFloat(n).toFixed(dec).replace(/\.?0+$/, '');
 }
 function toast(msg, type = 'success') {
