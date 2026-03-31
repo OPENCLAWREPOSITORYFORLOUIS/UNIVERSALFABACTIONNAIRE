@@ -9,18 +9,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #090E1A;
-    --bg2: #0E1624;
-    --surface: rgba(255,255,255,0.04);
-    --surface-hover: rgba(255,255,255,0.08);
-    --border: rgba(255,255,255,0.08);
-    --accent: #3D8BFF;
-    --accent2: #7B5EFF;
-    --gold: #F5B731;
-    --success: #22C97A;
-    --danger: #FF5B5B;
-    --text: #E8EDF8;
-    --muted: rgba(232,237,248,0.45);
+    --bg: #060B16;
+    --bg2: #0B172D;
+    --surface: rgba(61,139,255,0.06);
+    --surface-hover: rgba(61,139,255,0.12);
+    --border: rgba(61,139,255,0.15);
+    --accent: #00D2FF;
+    --accent2: #3D8BFF;
+    --gold: #FFB800;
+    --success: #00FF94;
+    --danger: #FF4D4D;
+    --text: #FFFFFF;
+    --muted: rgba(255,255,255,0.6);
     --font: 'Inter', sans-serif;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -775,9 +775,9 @@ async function loadProfile() {
   const { data } = await db.from('profiles').select('*').eq('id', currentUser.id).single();
   if (data) currentProfile = data;
 
-  const shares    = formatNum(currentProfile.total_shares_count ?? 0, 2);
-  const invested  = formatCFA(currentProfile.total_invested ?? 0);
-  const dividends = formatCFA(currentProfile.dividends_balance ?? 0);
+  const shares    = formatNum(currentProfile?.total_shares_count || 0, 2);
+  const invested  = formatCFA(currentProfile?.total_invested || 0);
+  const dividends = formatCFA(currentProfile?.dividends_balance || 0);
 
   document.getElementById('stat-shares').textContent        = shares + ' Actions';
   document.getElementById('stat-invested').textContent      = invested;

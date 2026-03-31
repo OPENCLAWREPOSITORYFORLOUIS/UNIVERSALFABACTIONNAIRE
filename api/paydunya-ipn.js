@@ -14,16 +14,16 @@ export default async function handler(req, res) {
   const PRIVATE_KEY = process.env.PAYDUNYA_PRIVATE_KEY;
   const TOKEN = process.env.PAYDUNYA_TOKEN;
   const isSandbox = (PRIVATE_KEY || '').startsWith('test_');
-  const baseUrl = isSandbox ? 'https://sandbox.paydunya.com' : 'https://app.paydunya.com';
+  const baseUrl = isSandbox ? 'https://app.paydunya.com/sandbox-api/v1' : 'https://app.paydunya.com/api/v1';
 
   try {
     // 1. Double check the transaction status with PayDunya API
-    const checkRes = await fetch(`${baseUrl}/api/v1/checkout-invoice/confirm/${token}`, {
+    const checkRes = await fetch(`${baseUrl}/checkout-invoice/confirm/${token}`, {
        method: 'GET',
        headers: {
-          'X-Paydunya-Master-Key': MASTER_KEY,
-          'X-Paydunya-Private-Key': PRIVATE_KEY,
-          'X-Paydunya-Token': TOKEN
+          'PAYDUNYA-MASTER-KEY': MASTER_KEY,
+          'PAYDUNYA-PRIVATE-KEY': PRIVATE_KEY,
+          'PAYDUNYA-TOKEN': TOKEN
        }
     });
 
