@@ -1,13 +1,14 @@
 <!DOCTYPE html>
   <html lang="fr">
-    <head>
+    <head><style>html,body{opacity:1 !important; visibility:visible !important; display:block !important; background-color:transparent !important;}</style>
       <meta charset="utf-8">
       <title>Universal Fab — Modèle Statique</title>
       <meta name="viewport" content="width=device-width,initial-scale=1">
       <link rel="icon" href="favicon.ico">
       
     <link href="dist/index.css" rel="stylesheet">
-        <script defer src="libs/lottie.js"></script>
+        
+    <script defer src="libs/lottie.js"></script>
     <script defer src="dist/index.js"></script>
     <script defer src="js/shared-header.js"></script>
 
@@ -45,6 +46,22 @@
   .rx-export-btn:hover { background: var(--p) !important; transform: scale(1.05); }
 </style>
 
+
+    <!-- Force visibility if main bundle fails -->
+    <style>
+        .home__content, .header, .cursor { opacity: 1 !important; visibility: visible !important; }
+        .text-anim, .img-anim .img-container { opacity: 1 !important; visibility: visible !important; transform: none !important; }
+        #lottie { display: block !important; opacity: 1 !important; }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+             document.querySelectorAll('.home__content, .header').forEach(el => {
+                 el.style.opacity = '1';
+                 el.style.visibility = 'visible';
+             });
+        });
+    </script>
+        
 </head>
 <body data-barba="wrapper">
 <header class="header">
@@ -74,7 +91,7 @@
             </div>
           </div>
           <div class="img">
-            <img loading="lazy" src="img/RX_4_STATIQUE.jpeg" alt="" class="full" />
+            <img loading="lazy" src="img/RX_4_STATIQUE.webp" alt="" class="full" />
             <div class="legend">
               <svg width="10" height="13" viewBox="0 0 10 13" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" clip-rule="evenodd" d="M5.20711 0.540077L4.85355 0.186523L4.5 0.540077L0 5.04008L0.707107 5.74718L4.35355 2.10074V12.8936H5.35355V2.10074L9 5.74718L9.70711 5.04008L5.20711 0.540077Z" fill="#BBBBBB"/>
@@ -274,5 +291,5 @@
       </div>
 
 
-    </body>
+    <div id="dummy-video-marker" style="display:none"><video muted playsinline style="display:none;" class="click-sound"><!-- Dummy to avoid JS errors --></video></div></body>
   </html>

@@ -2034,3 +2034,4 @@ body {
     font-size: 14px;
   }
 }
+.home__content { opacity: 1 !important; visibility: visible !important; } .header { opacity: 1 !important; pointer-events: initial !important; } .text-anim { opacity: 1 !important; visibility: visible !important; transform: none !important; } .img-anim .img-container { opacity: 1 !important; visibility: visible !important; transform: none !important; }

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
+<head><style>html,body{opacity:1 !important; visibility:visible !important; display:block !important; background-color:transparent !important;}</style>
   <meta charset="utf-8">
   <title>Devis Automatique | Universal Fab</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -9,9 +9,26 @@
                 
     <!-- Project Scripts -->
     <link href="dist/index.css" rel="stylesheet">
+    
     <script defer src="libs/lottie.js"></script>
     <script defer src="dist/index.js"></script>
     <script defer src="js/shared-header.js"></script>
+
+    <!-- Force visibility if main bundle fails -->
+    <style>
+        .home__content, .header, .cursor { opacity: 1 !important; visibility: visible !important; }
+        .text-anim, .img-anim .img-container { opacity: 1 !important; visibility: visible !important; transform: none !important; }
+        #lottie { display: block !important; opacity: 1 !important; }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+             document.querySelectorAll('.home__content, .header').forEach(el => {
+                 el.style.opacity = '1';
+                 el.style.visibility = 'visible';
+             });
+        });
+    </script>
+        
 </head>
 <body data-barba="wrapper">
         
@@ -53,7 +70,7 @@
                   </div>
                 </div>
               <div class="img-wrap">
-                <img loading="lazy" class="img full" src="img/RX1_ELECTRIQUE.jpeg" alt="Modèle Électrique" />
+                <img loading="lazy" class="img full" src="img/RX1_ELECTRIQUE.webp" alt="Modèle Électrique" />
               </div>
             </div>
             <div class="caption">
@@ -79,7 +96,7 @@
                   </div>
                 </div>
                 <div class="img-wrap">
-                  <img loading="lazy" class="img full" src="img/RX_2_THERMIQUE.jpeg" alt="Modèle Thermique" />
+                  <img loading="lazy" class="img full" src="img/RX_2_THERMIQUE.webp" alt="Modèle Thermique" />
                 </div>
               </div>
               <div class="caption">
@@ -100,7 +117,7 @@
                   </div>
                 </div>
                 <div class="img-wrap">
-                  <img loading="lazy" class="img full" src="img/RX_3_REMORQUE.jpeg" alt="Modèle Remorquable" />
+                  <img loading="lazy" class="img full" src="img/RX_3_REMORQUE.webp" alt="Modèle Remorquable" />
                 </div>
               </div>
               <div class="caption">
@@ -126,7 +143,7 @@
                   </div>
                 </div>
               <div class="img-wrap">
-                <img loading="lazy" class="img full" src="img/RX_4_STATIQUE.jpeg" alt="Modèle Statique" />
+                <img loading="lazy" class="img full" src="img/RX_4_STATIQUE.webp" alt="Modèle Statique" />
               </div>
             </div>
             <div class="caption">
@@ -200,5 +217,5 @@
     </svg>
     <span>configurer</span>
   </div>
-</body>
+<div id="dummy-video-marker" style="display:none"><video muted playsinline style="display:none;" class="click-sound"><!-- Dummy to avoid JS errors --></video></div></body>
 </html>

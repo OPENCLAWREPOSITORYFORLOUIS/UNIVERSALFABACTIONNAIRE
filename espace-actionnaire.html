@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
+<head><style>html,body{opacity:1 !important; visibility:visible !important; display:block !important; background-color:transparent !important;}</style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Espace Actionnaire — Universal Fab</title>
 <link rel="icon" href="favicon.ico">
-<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -297,14 +296,29 @@
 
     
     <!-- Core Libraries -->
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script defer src="https://unpkg.com/@barba/core"></script>
     
     <!-- Project Scripts -->
     <link href="dist/index.css" rel="stylesheet">
     
+    <script defer src="libs/lottie.js"></script>
     <script defer src="dist/index.js"></script>
     <script defer src="js/shared-header.js"></script>
+
+    <!-- Force visibility if main bundle fails -->
+    <style>
+        .home__content, .header, .cursor { opacity: 1 !important; visibility: visible !important; }
+        .text-anim, .img-anim .img-container { opacity: 1 !important; visibility: visible !important; transform: none !important; }
+        #lottie { display: block !important; opacity: 1 !important; }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+             document.querySelectorAll('.home__content, .header').forEach(el => {
+                 el.style.opacity = '1';
+                 el.style.visibility = 'visible';
+             });
+        });
+    </script>
+        
 </head>
 <body>
 
@@ -552,14 +566,28 @@
 <!-- Toast notifications -->
 <div id="toast"></div>
 
+<!-- Core Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
 // ─────────────────────────────────────────────
-// CONFIGURATION
+// CONFIGURATION & INIT
 // ─────────────────────────────────────────────
+var db; // Use var for true global scope and avoid TDZ
 const SUPABASE_URL  = 'https://exkofskxjvcuclyozlho.supabase.co';
 const SUPABASE_ANON = 'sb_publishable_zWiaMU_WeuAbLjr1cHcgDg_wr79HXzE';
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+try {
+  if (typeof supabase !== 'undefined') {
+    db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  } else {
+    console.error("Supabase library not loaded yet!");
+  }
+} catch (e) {
+  console.error("Supabase init failed:", e);
+}
+
+
 
 // Projects data (can later be loaded from DB)
 const PROJECTS = [
@@ -568,9 +596,9 @@ const PROJECTS = [
     name: 'Universal Fab (Entreprise globale)',
     description: 'Investissement et achat d\'actions dans l\'entreprise Universal Fab (maison mère).',
     emoji: '🏭',
-    price_per_share: 2000, // 10k = 5 actions so 1 action = 2000 CFA
-    min_shares: 5,         // 5 actions * 2000 = 10,000 CFA min.
-    target_shares: 25000,
+    price_per_share: 10000,
+    min_shares: 0.01,
+    target_shares: 5000,
     sold_shares: 0,
     status: 'Ouvert',
     roi: '',
@@ -580,9 +608,9 @@ const PROJECTS = [
     name: 'Restaurants Mobiles',
     description: 'Déploiement stratégique de restaurants mobiles solaires au Sénégal.',
     emoji: '🍽️',
-    price_per_share: 2000,
-    min_shares: 5,
-    target_shares: 2500,
+    price_per_share: 10000,
+    min_shares: 0.01,
+    target_shares: 500,
     sold_shares: 0,
     status: 'Ouvert',
     roi: '',
@@ -618,11 +646,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   if (params.get('payment') === 'success') {
     toast('Paiement reçu ! Vos actions seront attribuées dans quelques instants.', 'success');
-    // Force refresh profile and investments after a small delay to allow webhook processing
-    setTimeout(async () => {
-      await loadProfile();
-      await loadMyInvestments();
-    }, 2000);
     window.history.replaceState({}, '', window.location.pathname);
   }
   if (params.get('payment') === 'error') {
@@ -864,7 +887,7 @@ async function doInvest(projectId, projectName) {
   const amountInput = document.getElementById(`inv-${projectId}`);
   const amount = parseInt(amountInput.value);
   const project = PROJECTS.find(p => p.id === projectId);
-  const minAmount = 10000;
+  const minAmount = 200;
 
   if (!amount || isNaN(amount)) { toast('Entrez un montant à investir.', 'error'); return; }
   if (amount < minAmount) {
@@ -979,7 +1002,7 @@ async function doWithdraw() {
   errEl.textContent = '';
 
   if (!phone)  { errEl.textContent = 'Entrez votre numéro de téléphone.'; return; }
-  if (!amount || amount < 200) { errEl.textContent = 'Montant minimum : 200 FCFA.'; return; }
+  if (!amount || amount < 1000) { errEl.textContent = 'Montant minimum : 1 000 FCFA.'; return; }
   if (amount > (currentProfile.dividends_balance ?? 0)) {
     errEl.textContent = 'Solde insuffisant.'; return;
   }
@@ -1018,5 +1041,5 @@ function toast(msg, type = 'success') {
   setTimeout(() => el.remove(), 4000);
 }
 </script>
-</body>
+<div id="dummy-video-marker" style="display:none"><video muted playsinline style="display:none;" class="click-sound"><!-- Dummy to avoid JS errors --></video></div></body>
 </html>

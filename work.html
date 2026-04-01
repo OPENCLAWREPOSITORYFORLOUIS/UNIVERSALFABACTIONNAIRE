@@ -2,7 +2,7 @@
   <html lang="en">
     
 
-<head>
+<head><style>html,body{opacity:1 !important; visibility:visible !important; display:block !important; background-color:transparent !important;}</style>
       <meta charset="utf-8">
         <title>ONTO — work</title>
 
@@ -10,7 +10,7 @@
         <meta name="viewport" content="width=device-width,initial-scale=1">
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="theme-color" content="#ffffff">
-        <meta property="og:image" content="img/tete%20d'affiche%20parc%20de%20restaurant.jpeg" />
+        <meta property="og:image" content="img/tete%20d'affiche%20parc%20de%20restaurant.webp" />
 
         <link rel="shortcut icon" href="favicon.ico">
 
@@ -18,9 +18,26 @@
                 
     <!-- Project Scripts -->
     <link href="dist/index.css" rel="stylesheet">
+    
     <script defer src="libs/lottie.js"></script>
     <script defer src="dist/index.js"></script>
     <script defer src="js/shared-header.js"></script>
+
+    <!-- Force visibility if main bundle fails -->
+    <style>
+        .home__content, .header, .cursor { opacity: 1 !important; visibility: visible !important; }
+        .text-anim, .img-anim .img-container { opacity: 1 !important; visibility: visible !important; transform: none !important; }
+        #lottie { display: block !important; opacity: 1 !important; }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+             document.querySelectorAll('.home__content, .header').forEach(el => {
+                 el.style.opacity = '1';
+                 el.style.visibility = 'visible';
+             });
+        });
+    </script>
+        
 </head>
     <body data-barba="wrapper">
       
@@ -63,7 +80,7 @@
                       </div>
                     </div>
                   <div class="img-wrap">
-                    <img loading="lazy" class="img full" src="img/tete d'affiche parc de restaurant.jpeg" alt="Parc de restaurant mobile" />
+                    <img loading="lazy" class="img full" src="img/tete d'affiche parc de restaurant.webp" alt="Parc de restaurant mobile" />
                   </div>
                 </div>
                 <div class="caption">
@@ -90,7 +107,7 @@
                       </div>
                     </div>
                     <div class="img-wrap">
-                      <img loading="lazy" class="img full" src="img/Mobile Home fond blanc.jpeg" alt="Mobile Home" />
+                      <img loading="lazy" class="img full" src="img/Mobile Home fond blanc.webp" alt="Mobile Home" />
                     </div>
                   </div>
                   <div class="caption">
@@ -112,7 +129,7 @@
                       </div>
                     </div>
                     <div class="img-wrap">
-                      <img loading="lazy" class="img full" src="img/tete d'affiche chambre froide.jpeg" alt="Chambre froide" />
+                      <img loading="lazy" class="img full" src="img/tete d'affiche chambre froide.webp" alt="Chambre froide" />
                     </div>
                   </div>
                   <div class="caption">
@@ -191,7 +208,7 @@
       </div>
 
 
-    </body>
+    <div id="dummy-video-marker" style="display:none"><video muted playsinline style="display:none;" class="click-sound"><!-- Dummy to avoid JS errors --></video></div></body>
 
 
 </html>
