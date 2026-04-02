@@ -163,28 +163,33 @@ async function doLogout() {
 
 // ─── DASHBOARD ───
 async function enterDashboard() {
+  // 1. Show UI immediately
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  
+  // 2. Render local projects immediately
+  renderProjects();
+
   try {
-    document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'block';
     const identifier = currentUser.phone ? currentUser.phone : currentUser.email;
-    document.getElementById('nav-email').textContent = identifier || 'Actionnaire';
+    const navEmail = document.getElementById('nav-email');
+    if (navEmail) navEmail.textContent = identifier || 'Actionnaire';
 
     await loadProfile().catch(e => console.error("Profile load failed:", e));
     
     if (currentProfile) {
-      document.getElementById('prof-name').value = currentProfile.full_name || currentUser.user_metadata?.full_name || '';
-      document.getElementById('prof-email').value = currentUser.email || currentProfile.email || '';
-      document.getElementById('prof-phone').value = currentUser.phone || currentProfile.phone || '';
+      const pName = document.getElementById('prof-name');
+      const pEmail = document.getElementById('prof-email');
+      const pPhone = document.getElementById('prof-phone');
+      if (pName) pName.value = currentProfile.full_name || currentUser.user_metadata?.full_name || '';
+      if (pEmail) pEmail.value = currentUser.email || currentProfile.email || '';
+      if (pPhone) pPhone.value = currentUser.phone || currentProfile.phone || '';
     }
 
-    renderProjects();
     await loadMyInvestments().catch(e => console.error("Investments load failed:", e));
     await loadPayoutHistory().catch(e => console.error("Payout history load failed:", e));
   } catch (err) {
-    console.error("Dashboard entry failed:", err);
-    toast("Erreur lors du chargement du tableau de bord.", "error");
-    // Force project rendering anyway
-    renderProjects();
+    console.error("Dashboard entry details failed:", err);
   }
 }
 

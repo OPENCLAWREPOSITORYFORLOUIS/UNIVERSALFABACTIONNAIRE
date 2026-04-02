@@ -10,7 +10,7 @@ function updateHeader() {
     const path = window.location.pathname.toLowerCase();
     
     // Skip if on the dashboard (it has its own specialized header logic)
-    if (path.includes('espace-actionnaire.html')) return;
+    if (path.includes('espace-actionnaire')) return;
 
     // Check current page type
     const isHome = path === '' || path === '/' || path.includes('index.html');
