@@ -12,9 +12,9 @@ const OPERATOR_MAP = {
   'WAVE':         'Wave Senegal',
   'ORANGE_MONEY': 'Orange Money Senegal',
   'ORANGE':       'Orange Money Senegal',
-  'FREE_MONEY':   'Free Money Senegal',
-  'FREE':         'Free Money Senegal',
-  'EXPRESSO':     'Expresso Senegal',
+  'FREE_MONEY':   'Free Money',
+  'FREE':         'Free Money',
+  // Expresso is not in the allowed list provided by the error message.
 };
 
 export default async function handler(req, res) {

@@ -163,20 +163,29 @@ async function doLogout() {
 
 // ─── DASHBOARD ───
 async function enterDashboard() {
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('dashboard').style.display = 'block';
-  const identifier = currentUser.phone ? currentUser.phone : currentUser.email;
-  document.getElementById('nav-email').textContent = identifier || 'Actionnaire';
+  try {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    const identifier = currentUser.phone ? currentUser.phone : currentUser.email;
+    document.getElementById('nav-email').textContent = identifier || 'Actionnaire';
 
-  await loadProfile();
-  
-  document.getElementById('prof-name').value = currentProfile.full_name || currentUser.user_metadata?.full_name || '';
-  document.getElementById('prof-email').value = currentUser.email || currentProfile.email || '';
-  document.getElementById('prof-phone').value = currentUser.phone || currentProfile.phone || '';
+    await loadProfile().catch(e => console.error("Profile load failed:", e));
+    
+    if (currentProfile) {
+      document.getElementById('prof-name').value = currentProfile.full_name || currentUser.user_metadata?.full_name || '';
+      document.getElementById('prof-email').value = currentUser.email || currentProfile.email || '';
+      document.getElementById('prof-phone').value = currentUser.phone || currentProfile.phone || '';
+    }
 
-  renderProjects();
-  await loadMyInvestments();
-  await loadPayoutHistory();
+    renderProjects();
+    await loadMyInvestments().catch(e => console.error("Investments load failed:", e));
+    await loadPayoutHistory().catch(e => console.error("Payout history load failed:", e));
+  } catch (err) {
+    console.error("Dashboard entry failed:", err);
+    toast("Erreur lors du chargement du tableau de bord.", "error");
+    // Force project rendering anyway
+    renderProjects();
+  }
 }
 
 async function loadProfile() {

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Espace Actionnaire — Universal Fab</title>
+<link rel="icon" href="/assets/favicon-CK4665f-.ico">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script src="js/dashboard.js" defer></script>
+<script src="js/shared-header.js" defer></script>
+  <link rel="stylesheet" crossorigin href="/assets/espace-actionnaire-C3H4Z4kd.css">
+</head>
+<body>
+
+<!-- ─── AUTH SCREEN ─── -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo"><div class="dot"></div>UNIVERSAL FAB</div>
+
+    <!-- Login Form -->
+    <div id="login-form">
+      <h1 class="auth-title">Espace Actionnaire</h1>
+      <p class="auth-sub">Connectez-vous à votre portefeuille.</p>
+      <div class="form-group">
+        <label for="login-id">E-mail ou Numéro de téléphone</label>
+        <input type="text" id="login-id" placeholder="jean@mail.com ou 770000000">
+      </div>
+      <div class="form-group">
+        <label for="login-password">Mot de passe</label>
+        <input type="password" id="login-password" placeholder="••••••••">
+      </div>
+      <div class="auth-error" id="login-error"></div>
+      <button class="btn btn-primary" onclick="doLogin()">Connexion</button>
+      <p class="auth-switch">Pas encore actionnaire ? <a onclick="toggleAuth()">Créer un compte</a></p>
+    </div>
+
+    <!-- Register Form -->
+    <div id="register-form" style="display:none">
+      <h1 class="auth-title">Rejoindre l'aventure</h1>
+      <p class="auth-sub">Créez votre compte (Remplissez au moins E-mail OU Téléphone).</p>
+      <div class="form-group">
+        <label for="reg-name">Nom complet</label>
+        <input type="text" id="reg-name" placeholder="Prénom Nom">
+      </div>
+      <div class="form-group">
+        <label for="reg-email">Adresse E-mail (Optionnel si Numéro renseigné)</label>
+        <input type="email" id="reg-email" placeholder="jean@mail.com">
+      </div>
+      <div class="form-group">
+        <label for="reg-phone">Numéro de téléphone (Optionnel si E-mail renseigné)</label>
+        <input type="tel" id="reg-phone" placeholder="77 000 00 00">
+      </div>
+      <div class="form-group">
+        <label for="reg-password">Mot de passe</label>
+        <input type="password" id="reg-password" placeholder="Minimum 8 caractères">
+      </div>
+      <div class="auth-error" id="reg-error"></div>
+      <button class="btn btn-primary" onclick="doRegister()">Créer mon compte</button>
+      <p class="auth-switch">Déjà actionnaire ? <a onclick="toggleAuth()">Se connecter</a></p>
+    </div>
+  </div>
+</div>
+
+  <!-- ─── DASHBOARD ─── -->
+  <div id="dashboard">
+    <nav class="nav header">
+      <a href="index.html" class="nav-logo" style="text-decoration:none; color:inherit;">UNIVERSAL <span>FAB</span></a>
+      <div class="nav-right header__menu">
+        <span class="nav-user" id="nav-email"></span>
+        <button class="btn btn-ghost btn-sm" onclick="doLogout()">Déconnexion</button>
+      </div>
+    </nav>
+
+  <div class="main">
+    <!-- AVANTAGES -->
+    <section>
+      <div class="section-header">
+        <div class="section-icon icon-gold">⭐</div>
+        <h2 class="section-title">Vos Avantages Actionnaires</h2>
+      </div>
+      <div class="perks-grid">
+        <div class="perk-card unlocked" id="perk-1">
+          <div class="perk-icon">📊</div>
+          <div>
+            <div class="perk-name">Accès aux Rapports</div>
+            <div class="perk-desc">Consultez les rapports financiers trimestriels et les résultats de chaque projet.</div>
+            <span class="perk-badge badge-unlocked">✓ Débloqué</span>
+          </div>
+        </div>
+        <div class="perk-card" id="perk-2">
+          <div class="perk-icon">❄️</div>
+          <div>
+            <div class="perk-name">Priorité Chambre Froide</div>
+            <div class="perk-desc">Soyez prioritaire sur l'acquisition de chambres froides si la demande est forte.</div>
+            <span class="perk-badge badge-locked" id="perk-2-badge">🔒 Dès que vous êtes actionnaire</span>
+          </div>
+        </div>
+        <div class="perk-card" id="perk-3">
+          <div class="perk-icon">🚐</div>
+          <div>
+            <div class="perk-name">Crédit Restaurant Mobile</div>
+            <div class="perk-desc">Obtenez un Restaurant Mobile à crédit, payable par mensualités confortables.</div>
+            <span class="perk-badge badge-locked" id="perk-3-badge">🔒 Dès 100 actions</span>
+          </div>
+        </div>
+        <div class="perk-card" id="perk-4">
+          <div class="perk-icon">🤝</div>
+          <div>
+            <div class="perk-name">Siège au Conseil</div>
+            <div class="perk-desc">Participez aux décisions stratégiques majeures d'Universal Fab.</div>
+            <span class="perk-badge badge-locked" id="perk-4-badge">🔒 Dès 500 actions</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MES INVESTISSEMENTS -->
+    <section id="my-investments-section" style="display:none">
+      <div class="section-header">
+        <div class="section-icon icon-blue">📈</div>
+        <h2 class="section-title">Mes Investissements</h2>
+      </div>
+      <div class="my-investments" id="my-investments-list"></div>
+    </section>
+
+    <!-- PROJETS -->
+    <section>
+      <div class="section-header">
+        <div class="section-icon icon-purple">🚀</div>
+        <h2 class="section-title">Projets d'Investissement</h2>
+      </div>
+      <div class="projects-grid" id="projects-grid">
+        <div style="text-align:center; color:var(--muted); padding:40px; grid-column:1/-1">
+          <div class="spinner"></div>
+          <p style="margin-top:12px; font-size:14px">Chargement des projets…</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIVIDENDES -->
+    <section>
+      <div class="section-header">
+        <div class="section-icon icon-green">💸</div>
+        <h2 class="section-title">Dividendes & Retraits</h2>
+      </div>
+      <div class="dividends-layout">
+        <div class="withdraw-card">
+          <div class="balance-display">
+            <div class="balance-amount" id="withdraw-balance">0 FCFA</div>
+            <div class="balance-label">Disponible pour retrait</div>
+          </div>
+          <div class="form-group" style="display:none">
+            <label>Opérateur</label>
+            <div class="operator-select">
+              <div class="op-btn active" data-op="WAVE" onclick="selectOp(this)">🌊 Wave</div>
+              <div class="op-btn" data-op="ORANGE_MONEY" onclick="selectOp(this)">🟠 Orange Money</div>
+              <div class="op-btn" data-op="FREE_MONEY" onclick="selectOp(this)">🟡 Free Money</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="phone-number">Numéro de téléphone</label>
+            <input type="tel" id="phone-number" placeholder="+221 77 000 00 00">
+          </div>
+          <div class="form-group">
+            <label for="withdraw-amount">Montant à retirer (FCFA)</label>
+            <div class="invest-input-wrap">
+              <input type="number" class="invest-input" id="withdraw-amount" placeholder="5000" min="1000">
+              <span class="invest-currency">FCFA</span>
+            </div>
+          </div>
+          <div class="auth-error" id="withdraw-error"></div>
+          <button class="btn btn-gold" onclick="doWithdraw()">Retirer mes Dividendes</button>
+        </div>
+        <div class="history-card">
+          <div class="history-header">Historique des Retraits</div>
+          <div id="payout-history-wrap">
+            <div class="history-empty">Aucun retrait effectué pour le moment.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROFIL -->
+    <section>
+      <div class="section-header">
+        <div class="section-icon icon-gold">⚙️</div>
+        <h2 class="section-title">Informations Personnelles</h2>
+      </div>
+      <div class="withdraw-card" style="max-width:650px; margin-bottom:32px;">
+        <p style="font-size:13px; color:var(--muted); margin-bottom:24px;">Veuillez compléter vos informations pour sécuriser l'accès à vos investissements.</p>
+        <div class="form-group">
+          <label for="prof-name">Nom Complet</label>
+          <input type="text" id="prof-name" placeholder="Prénom Nom">
+        </div>
+        <div class="form-group">
+          <label for="prof-email">Adresse E-mail</label>
+          <input type="email" id="prof-email" placeholder="jean@mail.com">
+        </div>
+        <div class="form-group">
+          <label for="prof-phone">Numéro de Téléphone</label>
+          <input type="tel" id="prof-phone" placeholder="+221 77 000 00 00">
+        </div>
+        <div class="auth-error" id="prof-error"></div>
+        <button class="btn btn-ghost" onclick="updateProfile()" style="margin-top:16px;">Mettre à jour</button>
+      </div>
+    </section>
+
+    <!-- WHATSAPP -->
+    <section>
+      <a href="https://chat.whatsapp.com/LJ5ao94sDYPDyYzVsqU49r" target="_blank" rel="noopener" class="whatsapp-cta">
+        <div style="font-size:40px; flex-shrink:0;">💬</div>
+        <div>
+          <div style="font-size:16px; font-weight:700; color:#25D366; margin-bottom:4px;">Rejoindre la communauté d'investisseurs</div>
+          <div style="font-size:13px; color:var(--muted);">Échangez avec les autres actionnaires sur WhatsApp.</div>
+        </div>
+        <div style="margin-left:auto; font-size:22px; flex-shrink:0;">→</div>
+      </a>
+    </section>
+  </div>
+</div>
+
+<div id="toast"></div>
+</body>
+</html>
