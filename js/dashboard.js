@@ -9,7 +9,7 @@ const SUPABASE_ANON = 'sb_publishable_zWiaMU_WeuAbLjr1cHcgDg_wr79HXzE';
 
 let currentUser   = null;
 let currentProfile = { total_shares_count: 0, total_invested: 0, dividends_balance: 0 };
-let selectedOperator = 'ORANGE_MONEY';
+let selectedOperator = 'WAVE';
 
 // Projects data
 const PROJECTS = [

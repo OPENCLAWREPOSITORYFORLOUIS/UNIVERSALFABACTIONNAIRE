@@ -1,5 +1,6 @@
 // api/payout.js
-// Vercel Serverless Function — Processes dividend withdrawal via PayDunya v2 Disbursement
+// Vercel Serverless Function — Dividend withdrawal via PayDunya v2 Disburse (API PUSH)
+// Flow: get-invoice → submit-invoice → callback on IPN
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -7,14 +8,15 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY
 );
 
-// PayDunya v2 Disburse ONLY supports these modes (Wave NOT supported):
+// PayDunya v2 Disburse supported withdraw_modes (Sénégal)
+// Note: wave-senegal requires activation in PayDunya dashboard
 const OPERATOR_MAP = {
+  'WAVE':         'wave-senegal',
   'ORANGE_MONEY': 'orange-money-senegal',
   'ORANGE':       'orange-money-senegal',
   'FREE_MONEY':   'free-money-senegal',
   'FREE':         'free-money-senegal',
-  // Wave is NOT supported by PayDunya Disburse v2
-  'WAVE':         null,
+  'EXPRESSO':     'expresso-senegal',
 };
 
 export default async function handler(req, res) {
@@ -22,16 +24,16 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const MASTER_KEY = (process.env.PAYDUNYA_MASTER_KEY || '').trim();
-  const PRIVATE_KEY = (process.env.PAYDUNYA_PRIVATE_KEY || '').trim();
-  const TOKEN = (process.env.PAYDUNYA_TOKEN || '').trim();
-  const APP_URL = (process.env.APP_URL || 'http://localhost:5173').replace(/\/$/, '');
+  // IMPORTANT: Disburse v2 has NO sandbox mode.
+  // It ALWAYS requires LIVE keys on the LIVE endpoint.
+  // For test mode, we use separate LIVE disbursement keys stored in env.
+  const MASTER_KEY  = (process.env.PAYDUNYA_MASTER_KEY || '').trim();
+  const PRIVATE_KEY = (process.env.PAYDUNYA_DISBURSE_PRIVATE_KEY || process.env.PAYDUNYA_PRIVATE_KEY || '').trim();
+  const TOKEN       = (process.env.PAYDUNYA_DISBURSE_TOKEN || process.env.PAYDUNYA_TOKEN || '').trim();
+  const APP_URL     = (process.env.APP_URL || 'https://universalfabsn.space').replace(/\/$/, '');
 
-  // NOTE: PayDunya v2 Disburse has NO sandbox mode.
-  // It always uses the LIVE endpoint. Test keys won't work.
-  // For actual disbursement, LIVE keys with KYC validation are required.
-  const isTest = process.env.PAYDUNYA_MODE === 'test';
-  const API_BASE = 'https://app.paydunya.com/api/v2'; // Always LIVE for disburse
+  // Disburse ALWAYS uses the LIVE v2 endpoint (no sandbox exists)
+  const API_BASE = 'https://app.paydunya.com/api/v2';
 
   try {
     const { userId, amount, phoneNumber, phoneOperator } = req.body;
@@ -45,9 +47,9 @@ export default async function handler(req, res) {
     const withdraw_mode = OPERATOR_MAP[operatorKey];
 
     if (!withdraw_mode) {
-      return res.status(400).json({ 
-        error: `L'opérateur "${phoneOperator}" n'est pas supporté pour les retraits PayDunya. Utilisez Orange Money ou Free Money.`,
-        supported_operators: ['ORANGE_MONEY', 'FREE_MONEY']
+      return res.status(400).json({
+        error: `L'opérateur "${phoneOperator}" n'est pas supporté. Utilisez Wave, Orange Money ou Free Money.`,
+        supported: Object.keys(OPERATOR_MAP)
       });
     }
 
@@ -66,10 +68,10 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Solde de dividendes insuffisant.' });
     }
 
-    // In test mode, simulate success (PayDunya v2 Disburse has no sandbox)
-    if (isTest) {
+    // In test mode (PAYDUNYA_MODE=test), simulate success since Disburse has no sandbox
+    if (process.env.PAYDUNYA_MODE === 'test') {
       console.log('[TEST MODE] Simulating payout:', { userId, amount, phoneNumber, withdraw_mode });
-      
+
       await supabase.from('payouts').insert({
         user_id: userId,
         amount: amount,
@@ -83,13 +85,15 @@ export default async function handler(req, res) {
       return res.status(200).json({
         success: true,
         test_mode: true,
-        message: `[TEST] Retrait simulé de ${amount} FCFA via ${withdraw_mode}. En production, le virement sera réel.`
+        message: `[TEST] Retrait simulé de ${amount} FCFA via ${withdraw_mode}.`
       });
     }
 
-    // 2. LIVE MODE — PayDunya v2 Disburse
+    // 2. LIVE MODE — PayDunya v2 Disburse (API PUSH)
+    // account_alias = phone WITHOUT country code (doc requirement)
     const cleanPhone = phoneNumber.replace(/^\+221/, '').replace(/\s/g, '');
 
+    // Step A: Get Invoice Token
     const getInvoicePayload = {
       account_alias: cleanPhone,
       amount: amount,
@@ -97,9 +101,8 @@ export default async function handler(req, res) {
       callback_url: `${APP_URL}/api/paydunya-ipn`
     };
 
-    console.log('Disburse get-invoice payload:', JSON.stringify(getInvoicePayload));
+    console.log('Disburse get-invoice:', JSON.stringify(getInvoicePayload));
 
-    // Step A: Get Invoice Token
     const getInvRes = await fetch(`${API_BASE}/disburse/get-invoice`, {
       method: 'POST',
       headers: {
@@ -112,15 +115,15 @@ export default async function handler(req, res) {
     });
 
     const invText = await getInvRes.text();
-    console.log('Disburse get-invoice response:', invText);
+    console.log('Disburse get-invoice response:', getInvRes.status, invText);
 
     let invData;
-    try { invData = JSON.parse(invText); } catch { 
-      return res.status(500).json({ error: 'PayDunya a retourné une réponse invalide.', raw: invText.substring(0, 200) });
+    try { invData = JSON.parse(invText); } catch {
+      return res.status(500).json({ error: 'Réponse invalide de PayDunya.', raw: invText.substring(0, 200) });
     }
 
     if (invData.response_code !== '00') {
-      return res.status(500).json({ 
+      return res.status(500).json({
         error: invData.response_text || 'Erreur PayDunya Disburse.',
         code: invData.response_code
       });
@@ -128,7 +131,14 @@ export default async function handler(req, res) {
 
     const disburseToken = invData.disburse_token;
 
-    // Step B: Submit Invoice
+    // Step B: Submit Invoice to execute the disbursement
+    const submitPayload = {
+      disburse_invoice: disburseToken,
+      disburse_id: `UFAB-${Date.now()}` // Our internal reference
+    };
+
+    console.log('Disburse submit-invoice:', JSON.stringify(submitPayload));
+
     const submitRes = await fetch(`${API_BASE}/disburse/submit-invoice`, {
       method: 'POST',
       headers: {
@@ -137,41 +147,58 @@ export default async function handler(req, res) {
         'PAYDUNYA-PRIVATE-KEY': PRIVATE_KEY,
         'PAYDUNYA-TOKEN': TOKEN
       },
-      body: JSON.stringify({ disburse_invoice: disburseToken })
+      body: JSON.stringify(submitPayload)
     });
 
     const submitText = await submitRes.text();
-    console.log('Disburse submit-invoice response:', submitText);
+    console.log('Disburse submit-invoice response:', submitRes.status, submitText);
 
     let submitData;
     try { submitData = JSON.parse(submitText); } catch {
-      return res.status(500).json({ error: 'PayDunya submit a retourné une réponse invalide.', raw: submitText.substring(0, 200) });
+      // If submit fails, check status of the token
+      return res.status(500).json({ error: 'Réponse invalide au submit.', raw: submitText.substring(0, 200) });
     }
 
+    // Handle all possible statuses per documentation
     if (submitData.response_code === '00') {
+      const status = submitData.status || 'pending'; // can be 'success', 'pending', or 'failed'
+
       await supabase.from('payouts').insert({
         user_id: userId,
         amount: amount,
         phone_number: phoneNumber,
         operator: phoneOperator,
-        status: 'pending',
+        status: status === 'success' ? 'paid' : 'pending',
         naboopay_payout_id: disburseToken,
         created_at: new Date().toISOString()
       });
 
+      // If success, deduct from balance immediately
+      if (status === 'success') {
+        await supabase.rpc('decrement_dividends', { user_id_param: userId, amount_param: amount });
+      }
+      // If pending, balance will be deducted when IPN callback confirms success
+
       return res.status(200).json({
         success: true,
-        message: `Retrait de ${amount} FCFA initié via ${withdraw_mode}. Virement en cours.`
+        status: status,
+        message: status === 'success'
+          ? `Retrait de ${amount} FCFA effectué avec succès !`
+          : `Retrait de ${amount} FCFA initié. En attente de confirmation.`,
+        transaction_id: submitData.transaction_id
       });
     } else {
-      return res.status(500).json({ 
-        error: submitData.response_text || 'Erreur lors de la soumission du retrait.',
-        code: submitData.response_code 
+      // Per doc: if error, check status with check-status API using the token
+      // Status could be CREATED (retry submit), PENDING (wait), SUCCESS, FAILED
+      return res.status(500).json({
+        error: submitData.response_text || 'Erreur lors du retrait.',
+        code: submitData.response_code,
+        advice: 'Veuillez réessayer. Si le problème persiste, contactez le support.'
       });
     }
 
   } catch (err) {
     console.error('Payout error:', err);
-    return res.status(500).json({ error: 'Erreur interne du serveur.', details: err.message });
+    return res.status(500).json({ error: 'Erreur interne.', details: err.message });
   }
 }
