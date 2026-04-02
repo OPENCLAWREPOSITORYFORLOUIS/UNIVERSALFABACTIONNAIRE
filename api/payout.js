@@ -1,7 +1,6 @@
 // api/payout.js
 // Vercel Serverless Function — Dividend withdrawal via PayTech Transfer API
 import { createClient } from '@supabase/supabase-js';
-import fetch from 'node-fetch';
 
 const supabase = createClient(
   process.env.SUPABASE_URL || 'https://exkofskxjvcuclyozlho.supabase.co',
