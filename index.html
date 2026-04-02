@@ -1,63 +1,25 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head><style>html,body{opacity:1 !important; visibility:visible !important; display:block !important; background-color:transparent !important;}</style>
+<head>
     <meta charset="utf-8">
     <title>Universal Fab</title>
-    <!-- Force visibility ASAP -->
-    <style>
-        html, body, #onto-section, .home, .home__content, .header, .cursor, .page, #lottie { 
-            opacity: 1 !important; 
-            visibility: visible !important; 
-            display: block !important;
-            background-color: transparent !important;
-        }
-        .text-anim, .img-anim .img-container { 
-            opacity: 1 !important; 
-            visibility: visible !important; 
-            transform: none !important; 
-            transition: none !important;
-        }
-    </style>
-    <script>
-        window.onclick = function() { console.log('Click detected'); };
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOM Content Loaded - Forcing visibility');
-            document.body.style.opacity = '1';
-            document.body.style.visibility = 'visible';
-        });
-    </script>
-    <meta name="description" content="Universal Fab — Devenez actionnaire de la référence en restauration mobile. Investissez dans des fruck trucks connectés, durables et design.">
+    <meta name="description" content="Universal Fab — Devenez actionnaire de la référence en restauration mobile. Investissez dans des food trucks connectés, durables et design.">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="theme-color" content="#ffffff">
     <meta property="og:image" content="img/tete%20d'affiche%20parc%20de%20restaurant.webp" />
     <link rel="icon" href="favicon.ico">
-
-    <!-- Styles -->
     <link href="dist/index.css" rel="stylesheet">
-    
-
-    <!-- Force visibility if main bundle fails -->
     <style>
-        .home__content, .header, .cursor { opacity: 1 !important; visibility: visible !important; }
-        .text-anim, .img-anim .img-container { opacity: 1 !important; visibility: visible !important; transform: none !important; }
-        #lottie { display: block !important; opacity: 1 !important; }
+        html, body, .home__content, .header, .cursor, .page, #lottie {
+            opacity: 1 !important; visibility: visible !important;
+        }
+        .text-anim, .img-anim .img-container {
+            opacity: 1 !important; visibility: visible !important; transform: none !important;
+        }
     </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-             document.querySelectorAll('.home__content, .header').forEach(el => {
-                 el.style.opacity = '1';
-                 el.style.visibility = 'visible';
-             });
-        });
-    </script>
-    
-    <!-- Project Scripts -->
-    <script defer src="libs/lottie.js"></script>
-    <script defer src="dist/index.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+    <script defer src="js/main.js"></script>
     <script defer src="js/shared-header.js"></script>
-
-    
 </head>
 <body data-barba="wrapper">
 
@@ -95,8 +57,7 @@
                     </div>
                     <div class="home__content__video">
                         <video autoplay loop muted playsinline poster="img/tete%20d'affiche%20parc%20de%20restaurant.webp">
-                            <source src="video/hero.webm" type="video/webm">
-                            <source src="video/hero.mp4" type="video/mp4">
+                            <source src="video/hero2.webm" type="video/webm">
                         </video>
                     </div>
                 </div>
@@ -129,7 +90,5 @@
         <span>open case study</span>
     </div>
 
-    
-
-<div id="dummy-video-marker" style="display:none"><video muted playsinline style="display:none;" class="click-sound"><!-- Dummy to avoid JS errors --></video></div></body>
+</body>
 </html>
