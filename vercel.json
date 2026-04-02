@@ -12,10 +12,13 @@
   ],
   "cleanUrls": true,
   "functions": {
-    "api/create-paydunya-payment.js": {
+    "api/create-paytech-payment.js": {
       "regions": ["cdg1"]
     },
-    "api/paydunya-ipn.js": {
+    "api/paytech-ipn.js": {
+       "regions": ["cdg1"]
+    },
+    "api/payout.js": {
        "regions": ["cdg1"]
     }
   }
