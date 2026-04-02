@@ -248,23 +248,28 @@ async function doInvest(projectId, projectName) {
   if (!amount || isNaN(amount)) { toast('Entrez un montant à investir.', 'error'); return; }
   
   try {
-    const res = await fetch('/api/create-paydunya-payment', {
+    const res = await fetch('/api/create-paytech-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({ amount, projectId, projectName, userId: currentUser.id }),
     });
     const data = await res.json();
     if (data.redirect_url) {
+      // Create pending investment record
       await db.from('investments').insert({
-        user_id: currentUser.id, project_id: projectId, order_id: data.token,
-        amount_paid: amount, shares_count: amount / (project?.price_per_share || 10000), status: 'pending',
+        user_id: currentUser.id,
+        project_id: projectId,
+        order_id: data.token, // Store token to match with IPN later
+        amount_paid: amount,
+        shares_count: amount / (project?.price_per_share || 10000),
+        status: 'pending',
       });
       window.location.href = data.redirect_url;
     } else {
-      toast('Erreur PayDunya: ' + (data.error || 'Vérifiez de vos clés'), 'error');
+      toast('Erreur PayTech: ' + (data.error || 'Vérifiez vos clés API'), 'error');
     }
   } catch (e) {
-    toast('Erreur : ' + e.message, 'error');
+    toast('Erreur Réseau: ' + e.message, 'error');
   }
 }
 
