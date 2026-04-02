@@ -3,6 +3,15 @@ import { resolve } from 'path';
 import fs from 'fs';
 
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      input: Object.fromEntries(
+        fs.readdirSync(__dirname)
+          .filter(file => file.endsWith('.html'))
+          .map(file => [file.replace('.html', ''), resolve(__dirname, file)])
+      )
+    }
+  },
   server: {
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
