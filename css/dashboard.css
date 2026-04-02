@@ -285,3 +285,34 @@ body::before {
 .my-inv-name { font-size: 14px; font-weight: 600; }
 .my-inv-detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .my-inv-shares { font-size: 20px; font-weight: 800; color: var(--accent); }
+/* ─── MOBILE RESPONSIVENESS ─── */
+@media (max-width: 600px) {
+  .nav { padding: 12px 20px; }
+  .nav-logo { font-size: 14px; }
+  .nav-user { display: none; }
+  
+  .main { padding: 24px 16px; }
+  
+  .perks-grid { grid-template-columns: 1fr; }
+  .perk-card { padding: 16px; align-items: center; text-align: center; flex-direction: column; }
+  .perk-icon { margin-bottom: 8px; }
+  
+  .projects-grid { grid-template-columns: 1fr; }
+  .project-card { border-radius: 16px; }
+  .project-img { height: 140px; }
+  .project-body { padding: 16px; }
+  .project-stats { grid-template-columns: 1fr; gap: 8px; }
+  
+  .history-table th:nth-child(3), .history-table td:nth-child(3) { display: none; }
+  .history-table th, .history-table td { padding: 10px 12px; font-size: 12px; }
+  
+  .balance-amount { font-size: 32px; }
+  
+  .my-inv-row { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .my-inv-shares { font-size: 18px; align-self: flex-end; }
+}
+
+@media (max-width: 400px) {
+  .auth-card { padding: 32px 24px; border-radius: 16px; }
+  .auth-title { font-size: 22px; }
+}

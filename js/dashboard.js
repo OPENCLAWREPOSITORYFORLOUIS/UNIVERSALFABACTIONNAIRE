@@ -183,13 +183,7 @@ async function loadProfile() {
   const { data } = await db.from('profiles').select('*').eq('id', currentUser.id).single();
   if (data) currentProfile = data;
 
-  const shares    = formatNum(currentProfile.total_shares_count ?? 0, 2);
-  const invested  = formatCFA(currentProfile.total_invested ?? 0);
   const dividends = formatCFA(currentProfile.dividends_balance ?? 0);
-
-  document.getElementById('stat-shares').textContent        = shares + ' Actions';
-  document.getElementById('stat-invested').textContent      = invested;
-  document.getElementById('stat-dividends').textContent     = dividends;
   document.getElementById('withdraw-balance').textContent   = dividends;
 
   const total = currentProfile.total_shares_count ?? 0;
@@ -312,17 +306,31 @@ function selectOp(el) {
 }
 
 async function doWithdraw() {
-  const phone  = document.getElementById('phone-number').value.trim();
+  const rawPhone = document.getElementById('phone-number').value.trim();
   const amount = parseInt(document.getElementById('withdraw-amount').value);
   const errEl  = document.getElementById('withdraw-error');
   errEl.textContent = '';
-  if (!phone || !amount || amount < 1000) { errEl.textContent = 'Vérifiez les champs.'; return; }
+  
+  if (!rawPhone || !amount || amount < 1000) { errEl.textContent = 'Vérifiez les champs (Montant min. 1000).'; return; }
+
+  // Auto-detect operator
+  let phone = rawPhone.replace(/\s/g, '');
+  if (!phone.startsWith('+')) phone = '+221' + phone;
+  
+  const prefix = phone.substring(4, 6); // Get 77, 78, 76, etc.
+  let detectedOp = 'WAVE'; // Default
+  if (['77', '78'].includes(prefix)) detectedOp = 'ORANGE_MONEY';
+  else if (['76'].includes(prefix)) detectedOp = 'FREE_MONEY';
+  else if (['72'].includes(prefix)) detectedOp = 'EXPRESSO';
+  else detectedOp = 'WAVE'; 
+
+  console.log('Detected Operator:', detectedOp, 'for prefix:', prefix);
   
   try {
     const res = await fetch('/api/payout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: currentUser.id, amount, phoneNumber: phone, phoneOperator: selectedOperator }),
+      body: JSON.stringify({ userId: currentUser.id, amount, phoneNumber: phone, phoneOperator: detectedOp }),
     });
     const data = await res.json();
     if (data.success) {

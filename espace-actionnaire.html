@@ -61,36 +61,15 @@
   </div>
 </div>
 
-<!-- ─── DASHBOARD ─── -->
-<div id="dashboard">
-  <nav class="nav">
-    <div class="nav-logo">UNIVERSAL <span>FAB</span></div>
-    <div class="nav-right">
-      <span class="nav-user" id="nav-email"></span>
-      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Déconnexion</button>
-    </div>
-  </nav>
-
-  <div class="hero">
-    <p class="hero-label">Mon Portefeuille</p>
-    <div class="stats-row">
-      <div class="stat-card">
-        <p class="stat-label">Actions Totales</p>
-        <div class="stat-value blue" id="stat-shares">—</div>
-        <p class="stat-sub">Réparties sur vos projets</p>
+  <!-- ─── DASHBOARD ─── -->
+  <div id="dashboard">
+    <nav class="nav">
+      <div class="nav-logo">UNIVERSAL <span>FAB</span></div>
+      <div class="nav-right">
+        <span class="nav-user" id="nav-email"></span>
+        <button class="btn btn-ghost btn-sm" onclick="doLogout()">Déconnexion</button>
       </div>
-      <div class="stat-card">
-        <p class="stat-label">Capital Investi</p>
-        <div class="stat-value" id="stat-invested">—</div>
-        <p class="stat-sub">En francs CFA (XOF)</p>
-      </div>
-      <div class="stat-card">
-        <p class="stat-label">Dividendes Disponibles</p>
-        <div class="stat-value gold" id="stat-dividends">—</div>
-        <p class="stat-sub">Retirables maintenant</p>
-      </div>
-    </div>
-  </div>
+    </nav>
 
   <div class="main">
     <!-- AVANTAGES -->
@@ -170,7 +149,7 @@
             <div class="balance-amount" id="withdraw-balance">0 FCFA</div>
             <div class="balance-label">Disponible pour retrait</div>
           </div>
-          <div class="form-group">
+          <div class="form-group" style="display:none">
             <label>Opérateur</label>
             <div class="operator-select">
               <div class="op-btn active" data-op="WAVE" onclick="selectOp(this)">🌊 Wave</div>
