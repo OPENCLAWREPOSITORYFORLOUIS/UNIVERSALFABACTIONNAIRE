@@ -1,295 +1,369 @@
 <!DOCTYPE html>
-  <html lang="fr">
-    <head><style>html,body{opacity:1 !important; visibility:visible !important; display:block !important; background-color:transparent !important;}</style>
-      <meta charset="utf-8">
-      <title>Universal Fab — Modèle Thermique</title>
-      <meta name="viewport" content="width=device-width,initial-scale=1">
-      <link rel="icon" href="favicon.ico">
-      
-    <link href="dist/index.css" rel="stylesheet">
-        
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="utf-8">
+    <title>Universal Fab — Série RX 2 Thermique</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="icon" href="favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="css/legacy-bundle.css" rel="stylesheet">
+    <link href="css/pages.css" rel="stylesheet">
+    <link href="css/premium-devis.css" rel="stylesheet">
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script defer src="js/main.js"></script>
     <script defer src="js/shared-header.js"></script>
-
-
-
-
-
-
-
-
-
-        
-<style id="premium-rx-styles">
-  :root { --p: #3D8BFF; --text: #111; --bg: #fff; }
-  body { background: var(--bg) !important; color: var(--text) !important; font-family: sans-serif !important; }
-  .rx-config { width: 100% !important; max-width: 1200px !important; margin: 60px auto !important; background: #fff !important; padding: 40px 5% !important; border-top: 4px solid var(--p); }
-  .rx-config__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
-  .rx-config__title { font-size: 28px !important; font-weight: 900 !important; color: var(--text) !important; text-transform: uppercase; }
-  .rx-table-group { margin-bottom: 50px; }
-  .rx-table-group__title { color: var(--p) !important; font-size: 14px !important; font-weight: 900 !important; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; display: block; }
-  .rx-table { width: 100% !important; border-collapse: separate; border-spacing: 0 10px; }
-  .rx-table th { text-align: left; padding: 10px 20px; color: #888; font-size: 11px; text-transform: uppercase; font-weight: bold; }
-  .rx-table tr { background: #fdfdfd !important; border: 1px solid #f0f0f0; transition: all 0.2s; }
-  .rx-table tr:hover { background: #f8fbff !important; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-  .rx-table td { padding: 25px 20px !important; color: var(--text) !important; font-size: 15px !important; border-top: 1px solid #f9f9f9; }
-  .rx-table tr td:first-child { width: 50px; text-align: center; font-weight: 900; color: var(--p); border-radius: 10px 0 0 10px; }
-  .rx-table tr td:last-child { width: 140px; text-align: center; border-radius: 0 10px 10px 0; font-weight: bold; }
-  .rx-base { background: #f0f0f0; color: #555; padding: 6px 15px; border-radius: 20px; font-size: 10px; font-weight: 900; }
-  .rx-check { cursor: pointer; display: inline-block; }
-  .rx-check input { display: none; }
-  .rx-check span { width: 32px; height: 32px; border: 2px solid #ddd; border-radius: 8px; display: block; background: #fff; position: relative; }
-  .rx-check input:checked + span { background: var(--p) !important; border-color: var(--p) !important; shadow: 0 4px 10px rgba(61,139,255,0.3); }
-  .rx-check input:checked + span::after { content: "✔"; color: #fff; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-weight: bold; }
-  .rx-export-btn { background: #111 !important; color: #fff !important; border: none; padding: 15px 35px !important; border-radius: 50px !important; cursor: pointer; font-weight: 900; font-size: 12px; display: inline-flex; align-items: center; gap: 10px; transition: 0.3s; text-transform: uppercase; }
-  .rx-export-btn:hover { background: var(--p) !important; transform: scale(1.05); }
-</style>
-
-
-    <!-- Force visibility if main bundle fails -->
-    <style>
-        .home__content, .header, .cursor { opacity: 1 !important; visibility: visible !important; }
-        .text-anim, .img-anim .img-container { opacity: 1 !important; visibility: visible !important; transform: none !important; }
-        #lottie { display: block !important; opacity: 1 !important; }
-    </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-             document.querySelectorAll('.home__content, .header').forEach(el => {
-                 el.style.opacity = '1';
-                 el.style.visibility = 'visible';
-             });
-        });
-    </script>
-        
+    <script defer src="js/devis-export.js"></script>
 </head>
-<body data-barba="wrapper">
+<body>
+<div id="loading-overlay" class="rx-loading">
+    <div class="rx-loading__spinner"></div>
+    <div class="rx-loading__text">GÉNÉRATION DU DEVIS...</div>
+</div>
+
 <header class="header">
     <h1><a href="index.html" aria-label="Home"><span id="logo-lottie"></span></a></h1>
     <div class="header__menu">
-        <a href="espace-actionnaire.html" class="nos-produits-bubble actionnaire-btn" data-barba-prevent="self" style="margin-right: 12px; background-color: #3D8BFF !important; border-radius: 50px !important; padding: 10px 22px !important; color: #fff !important; display: inline-flex !important; align-items: center; justify-content: center; font-size: 13px !important; font-weight: bold !important; border:none !important;">
+        <a href="espace-actionnaire.html" class="ufab-nav-btn ufab-btn-blue" style="margin-right: 12px;">
             <span>ESPACE ACTIONNAIRE</span>
         </a>
-        <a href="devis-automatique.html" class="nos-produits-bubble return-btn" id="section-toggle" style="background-color: #f1f1f1 !important; color: #111 !important; border: 1px solid #ddd !important; border-radius: 50px !important; padding: 10px 22px !important; display: inline-flex !important; align-items: center; justify-content: center; font-size: 13px !important; font-weight: bold !important;">
-            <span id="section-toggle-text">Nos produits</span>
+        <a href="devis-automatique.html" class="ufab-nav-btn ufab-btn-light">
+            <span>RETOUR</span>
         </a>
     </div>
 </header>
-<main data-barba="container" data-barba-namespace="case">
-        <div class="case page-wrap" style="padding-left:0 !important; padding-right:0 !important;" data-id="2" data-prev="devis-rx1" data-next="devis-rx3">
-          <div class="case__details case-fade">
-            <div class="container">
-              <div>Robuste, Puissant, Longue portée</div>
-              <div><a href="devis-rx3.html" class="next">NEXT 03 — [MODÈLE REMORQUABLE]</a></div>
-            </div>
-          </div>
-          <div class="container">
-            <div class="head">
-              <div class="content">
-                <h1>Modèle Thermique</h1>
-              </div>
-            </div>
-          </div>
-          <div class="img">
-            <img loading="lazy" src="img/RX_2_THERMIQUE.webp" alt="" class="full" />
-            <div class="legend">
-              <svg width="10" height="13" viewBox="0 0 10 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M5.20711 0.540077L4.85355 0.186523L4.5 0.540077L0 5.04008L0.707107 5.74718L4.35355 2.10074V12.8936H5.35355V2.10074L9 5.74718L9.70711 5.04008L5.20711 0.540077Z" fill="#BBBBBB"/>
-              </svg>
-              <span>Aperçu de conception</span>
-            </div>
-          </div>
-          <div class="container">
-            <div class="menu-black">
-              <div class="case__intro">
-                <h3 class="text-anim">Performances garanties. Découvrez ce modèle et ajustez vos options pour obtenir un devis immédiat.</h3>
-              </div>
-              
-              <div class="case__information text-anim" style="margin-top:50px;">
-                <div><p>ESTIMATION DES COÛTS</p></div>
-                <div>
-                  <p>Cochez les équipements que vous souhaitez inclure dans votre structure. Le document généré vous servira de base de devis.</p>
-                </div>  
-              </div>
 
-              
-<section class="rx-config" id="rx-config">
-          <div class="rx-config__header">
-            <h2 class="rx-config__title u-md">Configuration &amp; Équipements</h2>
-            <button class="rx-export-btn" onclick="exportToPDF()" type="button">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>
-              Exporter en PDF
-            </button>
-          </div>
-
-          <div class="rx-table-group">
-            <h3 class="rx-table-group__title">Aménagement intérieur</h3>
-            <table class="rx-table">
-              <thead><tr><th>#</th><th>Élément</th><th>Description</th><th>Choix</th></tr></thead>
-              <tbody>
-                <tr><td>1</td><td>Habillage inox (OPTION)</td><td>Facilite le nettoyage et améliore l'hygiène.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-                <tr><td>2</td><td>Habillage PVC, fer et panneaux plastique</td><td>Solution plus économique  configuration de base.</td><td><span class="rx-base">INCLUS</span></td></tr>
-                <tr><td>3</td><td>Éclairage intérieur LED (couleurs)</td><td>Améliore la visibilité et l'ambiance.</td><td><span class="rx-base">INCLUS</span></td></tr>
-                <tr><td>4</td><td>Système de pompe d'eau intégré (OPTION)</td><td>Permet d'alimenter l'évier en eau courante.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-                <tr><td>5</td><td>Réservoir d'eau supplémentaire (OPTION)</td><td>Augmente la capacité pour une autonomie prolongée.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-                <tr><td>6</td><td>Autre porte d'accès (OPTION)</td><td>Améliore les déplacements à l'intérieur.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="rx-table-group">
-            <h3 class="rx-table-group__title">Équipement de base</h3>
-            <table class="rx-table">
-              <thead><tr><th>#</th><th>Élément</th><th>Description</th><th>Choix</th></tr></thead>
-              <tbody>
-                <tr><td>1</td><td>Extracteur d'air chaud</td><td>Évacue la chaleur et améliore la ventilation.</td><td><span class="rx-base">INCLUS</span></td></tr>
-                <tr><td>2</td><td>Ventilateur de rafraîchissement (OPTION)</td><td>Réduit la température pour le confort des employés.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-                <tr><td>3</td><td>Armoire de travail fer/plastique (OPTION)</td><td>Rangement sécurisé pour équipements et ingrédients.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-                <tr><td>4</td><td>Plateau de travail en bois (OPTION)</td><td>Surface de préparation des aliments.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-                <tr><td>5</td><td>Comptoir de rangement extérieur (OPTION)</td><td>Espace supplémentaire pour stocker du matériel.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-                <tr><td>6</td><td>Panneau publicitaire personnalisé (OPTION)</td><td>Améliore la visibilité du food truck.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="rx-table-group">
-            <h3 class="rx-table-group__title">Zone de service</h3>
-            <table class="rx-table">
-              <thead><tr><th>#</th><th>Élément</th><th>Description</th><th>Choix</th></tr></thead>
-              <tbody>
-                <tr><td>1</td><td>Comptoir de service avec ouverture (OPTION)</td><td>Point de contact avec les clients.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-                <tr><td>2</td><td>Tiroir-caisse sécurisé (OPTION)</td><td>Protection contre le vol et organisation des paiements.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-                <tr><td>3</td><td>Système de paiement par carte (OPTION)</td><td>Facilite les paiements sans espèces.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-                <tr><td>4</td><td>Tableau d'affichage numérique (OPTION)</td><td>Affichage moderne et attractif des plats disponibles.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="rx-table-group">
-            <h3 class="rx-table-group__title">Systèmes et utilitaires</h3>
-            <table class="rx-table">
-              <thead><tr><th>#</th><th>Élément</th><th>Description</th><th>Choix</th></tr></thead>
-              <tbody>
-                <tr><td>1</td><td>Générateur électrique (OPTION)</td><td>Fournit de l'électricité en autonomie.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-                <tr><td>2</td><td>Batteries solaires + onduleur (OPTION)</td><td>Alternative écologique pour l'alimentation électrique.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-                <tr><td>3</td><td>Panneaux solaires intégrés (OPTION)</td><td>Réduit la dépendance aux générateurs.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-                <tr><td>4</td><td>Batterie auxiliaire (OPTION)</td><td>Augmente l'autonomie énergétique.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-                <tr><td>5</td><td>Prise de branchement secteur 220V (OPTION)</td><td>Permet d'alimenter le food truck stationné.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="rx-table-group">
-            <h3 class="rx-table-group__title">Cuisine équipée  Zone de préparation</h3>
-            <table class="rx-table">
-              <thead><tr><th>#</th><th>Élément</th><th>Description</th><th>Choix</th></tr></thead>
-              <tbody>
-                <tr><td>1</td><td>Plan de travail acier inoxydable ou plastique</td><td>Surface hygiénique et résistante pour la préparation.</td><td><span class="rx-base">INCLUS</span></td></tr>
-                <tr><td>2</td><td>Rangements multiples pour ustensiles (OPTION)</td><td>Optimisation de l'espace de travail.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-                <tr><td>3</td><td>Tablette rabattable service rapide (OPTION)</td><td>Facilité d'organisation et gain de place.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-                <tr><td>4</td><td>Armoire produits secs (OPTION)</td><td>Stockage sécurisé des ingrédients.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="rx-table-group">
-            <h3 class="rx-table-group__title">Sécurité et conformité</h3>
-            <table class="rx-table">
-              <thead><tr><th>#</th><th>Élément</th><th>Description</th><th>Choix</th></tr></thead>
-              <tbody>
-                <tr><td>1</td><td>Extincteur ABC (2 kg)</td><td>Protection contre les incendies.</td><td><span class="rx-base">INCLUS</span></td></tr>
-                <tr><td>2</td><td>Trousse de premiers secours</td><td>Prise en charge rapide des blessures.</td><td><span class="rx-base">INCLUS</span></td></tr>
-                <tr><td>3</td><td>Signalisation de sécurité et sortie de secours</td><td>Respect des normes de sécurité.</td><td><span class="rx-base">INCLUS</span></td></tr>
-                <tr><td>4</td><td>Certificat de conformité alimentaire (OPTION)</td><td>Obligatoire pour exercer légalement.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-                <tr><td>5</td><td>Agrément sanitaire (OPTION)</td><td>Attestation officielle de conformité hygiène.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-                <tr><td>6</td><td>Assurance responsabilité civile (OPTION)</td><td>Couvre les risques liés à l'activité.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="rx-table-group">
-            <h3 class="rx-table-group__title">Fonctionnalités supplémentaires</h3>
-            <table class="rx-table">
-              <thead><tr><th>#</th><th>Élément</th><th>Description</th><th>Choix</th></tr></thead>
-              <tbody>
-                <tr><td>1</td><td>Système audio ambiance musicale</td><td>Améliore l'expérience client.</td><td><span class="rx-base">INCLUS</span></td></tr>
-                <tr><td>2</td><td>Bluetooth intégré</td><td>Permet de connecter des appareils audio facilement.</td><td><span class="rx-base">INCLUS</span></td></tr>
-                <tr><td>3</td><td>WiFi intégré (OPTION)</td><td>Gestion des commandes ou connexion clients.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-                <tr><td>4</td><td>Caméras de surveillance à distance</td><td>Sécurise le food truck contre les vols.</td><td><span class="rx-base">INCLUS</span></td></tr>
-                <tr><td>5</td><td>Habillage extérieur personnalisable (OPTION)</td><td>Crée une identité visuelle unique.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-                <tr><td>6</td><td>Menu digital interactif (OPTION)</td><td>Modernise la prise de commande.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-                <tr><td>7</td><td>Espace barbecue à l'arrière (OPTION)</td><td>Option de cuisson supplémentaire.</td><td><label class="rx-check"><input type="checkbox"><span></span></label></td></tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-            </div>
-          </div>
-
-          <div class="container">
-            <div class="case__footer">
-              <div class="case__footer__main">
-                <div class="case__footer__main__logo">
-                  <div id="logo-footer" style="display:none !important"></div>
-                  <h1 style="font-size: 3rem; margin-bottom: 2rem; font-weight: bold; text-transform: uppercase; font-family: sans-serif;">Universal fab</h1>
+<main>
+    <section class="rx-config" id="rx-config-content">
+        <div class="rx-config__header">
+            <div style="display: flex; gap: 30px; align-items: flex-start; width: 100%;">
+                <div style="flex: 0 0 250px;">
+                    <img src="img/RX_2_THERMIQUE.webp" id="rx-model-img" alt="RX 2" style="width: 100%; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
                 </div>
-                <h2>Rejoignez Universal Fab et devenez actionnaire d'une entreprise innovante qui transforme l'avenir de la restauration.</h2>
-                <a href="espace-actionnaire.html" target="_blank" rel="noopener noreferrer">
-                  <span>espace actionnaire</span>
-                  <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <g clip-path="url(#clip0_2959_124)">
-                  <path d="M9.14 7.68018L13.14 4.00018M13.14 4.00018L9.46 0.320176M13.14 4.00018L1.14 4.00018" stroke="#111111"/>
-                  </g>
-                  <defs>
-                  <clipPath id="clip0_2959_124">
-                  <rect width="13.28" height="8" fill="white" transform="matrix(-1 0 0 -1 13.78 8)"/>
-                  </clipPath>
-                  </defs>
-                  </svg>
-                </a>
-              </div>
-              <div class="case__footer__bottom">
-                <p>©2024 Agrilens Creative Studio</p>
-                <div class="links">
-              <a href="https://web.facebook.com/profile.php?id=61583566191566&amp;sk=reels_tab" target="_blank">Facebook</a>, <a href="https://www.tiktok.com/@universalfab" target="_blank">TikTok</a>, <a href="https://www.instagram.com/universalfabsn/" target="_blank">Instagram</a>
+                <div style="flex: 1;">
+                    <p class="rx-base text-reveal"><span>Série RX 2</span></p>
+                    <h2 class="rx-config__title text-reveal"><span>RX 2 Thermique</span></h2>
+                    <div style="margin-top: 15px; grid-template-columns: repeat(2, 1fr); display: grid; gap: 10px; font-size: 13px; color: #666;" class="fade-in">
+                        <span><strong>Type:</strong> Food truck</span>
+                        <span><strong>Dimensions:</strong> 296.13 x 170 x 243.18 cm</span>
+                        <span><strong>Poids:</strong> 0.6 tonnes (variable)</span>
+                        <span><strong>Moteur:</strong> Thermique</span>
+                        <span><strong>Autonomie:</strong> 50km plein essence</span>
+                        <span><strong>Vitesse Max:</strong> 50km/h</span>
+                    </div>
+                </div>
             </div>
-                <a href="devis-rx3.html" class="next">NEXT 03 — [MODÈLE REMORQUABLE]</a>
-              </div>
-            </div>
-          </div>
+            <button class="rx-export-btn" id="export-pdf-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                Exporter Devis PDF
+            </button>
         </div>
-      </main>
 
-      <div class="menu">
-        <nav class="navigation">
-          <a href="devis-automatique.html" class="navigation__item work-item">
-            <span class="text">
-              <span>Devis</span>
-              <span>Home</span>
-              <span>Galerie</span>
-            </span>
-            <span class="arrow bottom">
-              <span></span>
-              <span></span>
-              <span></span>
-              <span></span>
-              <span></span>
-            </span>
-          </a>
-        </nav>
-      </div>
+        <!-- AMÉNAGEMENT INTÉRIEUR -->
+        <div class="rx-table-group">
+            <span class="rx-table-group__title">Aménagement Intérieur</span>
+            <table class="rx-table">
+                <thead>
+                    <tr><th>#</th><th>Élément</th><th>Description / Utilité</th><th>Choix</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Habillage intérieur en inox (OPTION)</td>
+                        <td>Facilite le nettoyage et améliore l'hygiène.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Habillage intérieur PVC, fer et panneaux plastique</td>
+                        <td>Solution plus économique.</td>
+                        <td><span class="rx-base">Config de base</span></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Éclairage intérieur LED de couleurs différentes</td>
+                        <td>Améliore la visibilité et l'ambiance.</td>
+                        <td><span class="rx-base">Config de base</span></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Système de pompe d'eau intégré (OPTION)</td>
+                        <td>Permet d'alimenter l'évier en eau courante.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Réservoir d'eau supplémentaire (OPTION)</td>
+                        <td>Augmente la capacité en eau.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>Autre porte d'accès (OPTION)</td>
+                        <td>Améliore les déplacements à l'intérieur.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-      <div class="cursor">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0.542847 7.67929V8.30078H15.4571V7.67929H0.542847Z" fill="white"/>
-          <path d="M0.542847 7.67929V8.30078H15.4571V7.67929H0.542847Z" fill="white"/>
-          <path d="M7.6893 15.4668H8.31079V0.552504H7.6893V15.4668Z" fill="white"/>
-          <path d="M7.6893 15.4668H8.31079V0.552504H7.6893V15.4668Z" fill="white"/>
-        </svg>
-        <span>open case study</span>
-      </div>
+        <!-- ÉQUIPEMENT DE BASE -->
+        <div class="rx-table-group">
+            <span class="rx-table-group__title">Équipement de Base</span>
+            <table class="rx-table">
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Extracteur d'air chaud</td>
+                        <td>Évacue la chaleur et améliore la ventilation.</td>
+                        <td><span class="rx-base">Config de base</span></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Ventilateur de rafraîchissement (OPTION)</td>
+                        <td>Réduit la température intérieure.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Armoire de travail en fer et plastique (OPTION)</td>
+                        <td>Rangement sécurisé.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Plateau de travail en Bois (OPTION)</td>
+                        <td>Surface de préparation des aliments.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Comptoir de rangement extérieur (OPTION)</td>
+                        <td>Espace supplémentaire à l'extérieur.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>Panneau publicitaire logo personnalisé (OPTION)</td>
+                        <td>Améliore la visibilité du food truck.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
+        <!-- ZONE DE SERVICE -->
+        <div class="rx-table-group">
+            <span class="rx-table-group__title">Zone de Service</span>
+            <table class="rx-table">
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Comptoir de service avec ouverture extérieure (OPTION)</td>
+                        <td>Point de contact avec les clients.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Tiroir-caisse sécurisé (OPTION)</td>
+                        <td>Protection contre le vol.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Système de paiement par carte (OPTION)</td>
+                        <td>Facilite les paiements sans espèces.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Tableau d'affichage numérique menu (OPTION)</td>
+                        <td>Affichage moderne et attractif.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-    <div id="dummy-video-marker" style="display:none"><video muted playsinline style="display:none;" class="click-sound"><!-- Dummy to avoid JS errors --></video></div></body>
-  </html>
+        <!-- SYSTÈMES ET UTILITAIRES -->
+        <div class="rx-table-group">
+            <span class="rx-table-group__title">Systèmes et Utilitaires</span>
+            <table class="rx-table">
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Générateur électrique (OPTION)</td>
+                        <td>Fournit de l'électricité en autonomie.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Batteries solaires + onduleur (OPTION)</td>
+                        <td>Alternative écologique.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Panneaux solaires intégrés (OPTION)</td>
+                        <td>Réduit la dépendance au réseau.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Batterie auxiliaire (OPTION)</td>
+                        <td>Augmente l'autonomie énergétique.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Prise de branchement secteur (220V) (OPTION)</td>
+                        <td>Alimentation stationnée.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ZONE DE PRÉPARATION (CUISINE) -->
+        <div class="rx-table-group">
+            <span class="rx-table-group__title">Zone de Préparation</span>
+            <table class="rx-table">
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Plan de travail en acier inox ou plastique</td>
+                        <td>Surface hygiénique et résistante.</td>
+                        <td><span class="rx-base">Série RX</span></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Rangements multiples (OPTION)</td>
+                        <td>Optimisation de l'espace de travail.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Tablette rabattable pour service (OPTION)</td>
+                        <td>Facilité d'organisation.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Armoire de rangement produits secs (OPTION)</td>
+                        <td>Stockage sécurisé.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SÉCURITÉ ET CONFORMITÉ -->
+        <div class="rx-table-group">
+            <span class="rx-table-group__title">Sécurité et Conformité</span>
+            <table class="rx-table">
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Extincteur ABC (2 kg)</td>
+                        <td>Protection contre les incendies.</td>
+                        <td><span class="rx-base">Inclus</span></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Trousse de premiers secours</td>
+                        <td>Prise en charge rapide des blessures.</td>
+                        <td><span class="rx-base">Inclus</span></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Signalisation de sécurité</td>
+                        <td>Respect des normes de sécurité.</td>
+                        <td><span class="rx-base">Inclus</span></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Certificat de conformité alimentaire (OPTION)</td>
+                        <td>Obligatoire pour exercer légalement.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Agrément sanitaire (OPTION)</td>
+                        <td>Attestation d'hygiène officielle.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>Assurance responsabilité civile (OPTION)</td>
+                        <td>Couvre les risques liés à l'activité.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- FONCTIONNALITÉS SUPPLÉMENTAIRES -->
+        <div class="rx-table-group">
+            <span class="rx-table-group__title">Fonctionnalités Supplémentaires</span>
+            <table class="rx-table">
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Système audio pour ambiance musicale</td>
+                        <td>Améliore l'expérience client.</td>
+                        <td><span class="rx-base">Inclus</span></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Bluetooth intégré</td>
+                        <td>Connexion audio facilitée.</td>
+                        <td><span class="rx-base">Inclus</span></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>WiFi intégré (OPTION)</td>
+                        <td>Gestion des commandes.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Caméras de surveillance à distance</td>
+                        <td>Sécurité contre les vols.</td>
+                        <td><span class="rx-base">Inclus</span></td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Habillage extérieur personnalisable (OPTION)</td>
+                        <td>Identité visuelle unique.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>Menu digital interactif (OPTION)</td>
+                        <td>Modernise la prise de commande.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>Espace barbecue à l'arrière (OPTION)</td>
+                        <td>Option de cuisson supplémentaire.</td>
+                        <td><label class="rx-check"><input type="checkbox"><span></span></label></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<div class="cursor">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0.542847 7.67929V8.30078H15.4571V7.67929H0.542847Z" fill="white"/>
+        <path d="M7.6893 15.4668H8.31079V0.552504H7.6893V15.4668Z" fill="white"/>
+    </svg>
+    <span>configurer</span>
+</div>
+
+</body>
+</html>

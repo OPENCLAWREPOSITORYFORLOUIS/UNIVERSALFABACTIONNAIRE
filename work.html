@@ -2,7 +2,7 @@
   <html lang="en">
     
 
-<head><style>html,body{opacity:1 !important; visibility:visible !important; display:block !important; background-color:transparent !important;}</style>
+<head>
       <meta charset="utf-8">
         <title>ONTO — work</title>
 
@@ -17,9 +17,11 @@
         
                 
     <!-- Project Scripts -->
-    <link href="dist/index.css" rel="stylesheet">
+    <link href="css/legacy-bundle.css" rel="stylesheet">
+    <link href="css/pages.css" rel="stylesheet">
     
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script defer src="js/main.js"></script>
     <script defer src="js/shared-header.js"></script>
 
@@ -39,14 +41,14 @@
     </script>
         
 </head>
-    <body data-barba="wrapper">
+    <body>
       
       
 
 <header class="header">
     <h1><a href="index.html" aria-label="Home"><span id="logo-lottie"></span></a></h1>
     <div class="header__menu">
-        <a href="espace-actionnaire.html" class="nos-produits-bubble actionnaire-btn" data-barba-prevent="self" style="margin-right: 12px; background-color: #3D8BFF !important; border-radius: 50px !important; padding: 10px 22px !important; color: #fff !important; display: inline-flex !important; align-items: center; justify-content: center; font-size: 13px !important; font-weight: bold !important; border:none !important;">
+        <a href="espace-actionnaire.html" class="nos-produits-bubble actionnaire-btn" style="margin-right: 12px; background-color: #3D8BFF !important; border-radius: 50px !important; padding: 10px 22px !important; color: #fff !important; display: inline-flex !important; align-items: center; justify-content: center; font-size: 13px !important; font-weight: bold !important; border:none !important;">
             <span>ESPACE ACTIONNAIRE</span>
         </a>
         <a href="devis-automatique.html" class="nos-produits-bubble return-btn" id="section-toggle" style="background-color: #f1f1f1 !important; color: #111 !important; border: 1px solid #ddd !important; border-radius: 50px !important; padding: 10px 22px !important; display: inline-flex !important; align-items: center; justify-content: center; font-size: 13px !important; font-weight: bold !important;">
@@ -57,7 +59,7 @@
 
 
 
-      <main data-barba="container" data-barba-namespace="work">
+      <main>
         <div class="work page page-wrap">
           <div class="container">
             <div class="title-wrapper">
@@ -208,7 +210,7 @@
       </div>
 
 
-    <div id="dummy-video-marker" style="display:none"><video muted playsinline style="display:none;" class="click-sound"><!-- Dummy to avoid JS errors --></video></div></body>
+    </body>
 
 
 </html>

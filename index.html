@@ -2,13 +2,15 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8">
-    <title>Universal Fab</title>
+    <title>Universal Fab — Restauration Mobile, Investissement & Souveraineté</title>
     <meta name="description" content="Universal Fab — Devenez actionnaire de la référence en restauration mobile. Investissez dans des food trucks connectés, durables et design.">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="theme-color" content="#ffffff">
-    <meta property="og:image" content="img/tete%20d'affiche%20parc%20de%20restaurant.webp" />
+    <meta name="theme-color" content="#0a0a0a">
+    <meta property="og:image" content="img/tete%20d'affiche%20parc%20de%20restaurant.webp">
     <link rel="icon" href="favicon.ico">
-    <link href="dist/index.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="css/legacy-bundle.css" rel="stylesheet">
+    <link href="css/pages.css" rel="stylesheet">
     <style>
         html, body, .home__content, .header, .cursor, .page, #lottie {
             opacity: 1 !important; visibility: visible !important;
@@ -18,77 +20,184 @@
         }
     </style>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script defer src="js/main.js"></script>
     <script defer src="js/shared-header.js"></script>
 </head>
-<body data-barba="wrapper">
+<body>
 
-        <header class="header">
-        <h1><a href="index.html" aria-label="Home"><span id="logo-lottie"></span></a></h1>
-        <div class="header__menu">
-            <a href="espace-actionnaire.html" class="nos-produits-bubble actionnaire-btn" data-barba-prevent="self" style="margin-right: 12px; background-color: #3D8BFF !important; border-radius: 50px !important; padding: 10px 22px !important; color: #fff !important; display: inline-flex !important; align-items: center; justify-content: center; font-size: 13px !important; font-weight: bold !important; border:none !important;">
-                <span>ESPACE ACTIONNAIRE</span>
-            </a>
-            <a href="devis-automatique.html" class="nos-produits-bubble return-btn" id="section-toggle" style="background-color: #f1f1f1 !important; color: #111 !important; border: 1px solid #ddd !important; border-radius: 50px !important; padding: 10px 22px !important; display: inline-flex !important; align-items: center; justify-content: center; font-size: 13px !important; font-weight: bold !important;">
-                <span id="section-toggle-text">Nos produits</span>
-            </a>
-        </div>
-    </header>
+<!-- ─── SPLASH SCREEN ─── -->
+<div id="ufab-splash">
+    <div class="splash-dot"></div>
+    <div class="splash-title">UNIVERSAL FAB</div>
+    <div class="splash-sub">Fabrication Locale • Innovation</div>
+</div>
+<script>
+    setTimeout(() => {
+        const s = document.getElementById('ufab-splash');
+        if (s) { s.style.opacity = '0'; setTimeout(() => s.remove(), 800); }
+    }, 2200);
+</script>
 
-    <main data-barba="container" data-barba-namespace="home" id="onto-section">
-        <div class="home page">
-            <div id="lottie"></div>
-            <div class="home__content">
-                <div class="container">
-                    <div class="home__content__head">
-                        <p class="design">la solution locale</p>
-                        <div class="content">
-                            <h2>Universal Fab</h2>
-                        </div>
-                        <button type="button" class="home-play">Fullscreen</button>
-                        <button type="button" class="home-switch" aria-label="Switch Theme" title="Switch Theme">
-                            <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M0.349243 8.13518V8.81319H16.6196V8.13518H0.349243Z" fill="#111111"/>
-                                <path d="M0.349243 8.13518V8.81319H16.6196V8.13518H0.349243Z" fill="#111111"/>
-                                <path d="M8.14621 16.6308H8.82422V0.360377H8.14621V16.6308Z" fill="#111111"/>
-                                <path d="M8.14621 16.6308H8.82422V0.360377H8.14621V16.6308Z" fill="#111111"/>
-                            </svg>
-                        </button>
+<!-- ─── HEADER ─── -->
+<header class="header">
+    <h1><a href="index.html" aria-label="Home"><span id="logo-lottie"></span></a></h1>
+    <div class="header__menu"></div>
+</header>
+
+<!-- ─── HERO ─── -->
+<main id="onto-section">
+    <div class="home page">
+        <div id="lottie"></div>
+        <div class="home__content">
+            <div class="container">
+                <div class="home__content__head">
+                    <p class="design">la solution locale</p>
+                    <div class="content">
+                        <h2>Universal Fab</h2>
                     </div>
-                    <div class="home__content__video">
-                        <video autoplay loop muted playsinline poster="img/tete%20d'affiche%20parc%20de%20restaurant.webp">
-                            <source src="video/hero2.webm" type="video/webm">
-                        </video>
-                    </div>
+                    <button type="button" class="home-play">Fullscreen</button>
+                    <button type="button" class="home-switch" aria-label="Switch Theme" title="Switch Theme">
+                        <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0.349243 8.13518V8.81319H16.6196V8.13518H0.349243Z" fill="#111111"/>
+                            <path d="M8.14621 16.6308H8.82422V0.360377H8.14621V16.6308Z" fill="#111111"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="home__content__video">
+                    <video autoplay loop muted playsinline poster="img/tete%20d'affiche%20parc%20de%20restaurant.webp">
+                        <source src="video/hero2.webm" type="video/webm">
+                    </video>
                 </div>
             </div>
         </div>
-    </main>
-
-    <div class="menu">
-        <nav class="navigation">
-            <a href="work.html" class="navigation__item work-item" aria-label="Work" title="Work">
-                <span class="text">
-                    <span>Work</span>
-                    <span>Home</span>
-                    <span>Next Project</span>
-                </span>
-                <span class="arrow bottom">
-                    <span></span><span></span><span></span><span></span><span></span>
-                </span>
-            </a>
-        </nav>
     </div>
+</main>
 
-    <div class="cursor">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0.542847 7.67929V8.30078H15.4571V7.67929H0.542847Z" fill="white"/>
-            <path d="M0.542847 7.67929V8.30078H15.4571V7.67929H0.542847Z" fill="white"/>
-            <path d="M7.6893 15.4668H8.31079V0.552504H7.6893V15.4668Z" fill="white"/>
-            <path d="M7.6893 15.4668H8.31079V0.552504H7.6893V15.4668Z" fill="white"/>
+<!-- ─── NOS PROJETS ─── -->
+<section class="ufab-projects-split">
+    <div class="ufab-projects-split__container">
+        <div style="margin-bottom: 80px; max-width: 800px;">
+            <p style="color: #3D8BFF; font-weight: 900; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;">L'impact Universal Fab</p>
+            <h2 style="font-size: 3.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 20px;" class="text-reveal"><span>Nos Projets : Bâtir des Chaînes de Valeurs</span></h2>
+            <p style="font-size: 1.2rem; color: #666;" class="fade-in">De la création d'une chaîne nationale de restaurants mobiles à la mise en place d'une chaîne de froid solaire, nous transformons l'économie locale par l'innovation industrielle.</p>
+        </div>
+        <!-- Chaîne de Restaurants Mobiles -->
+        <article class="split-project" onclick="location.href='devis-automatique.html'">
+            <div class="split-project__image">
+                <img src="img/tete%20d'affiche%20parc%20de%20restaurant.webp" alt="Chaîne de Restaurants Mobiles" loading="lazy">
+            </div>
+            <div class="split-project__content">
+                <span class="split-project__number">01</span>
+                <span class="split-project__tag text-reveal"><span>Chaîne de Restaurants</span></span>
+                <h3 class="split-project__name text-reveal"><span>Restaurants Mobiles</span></h3>
+                <p class="split-project__desc fade-in">Un réseau de 50 food trucks connectés déployés sur tout le territoire sénégalais. Électriques, thermiques, remorquables ou statiques. Une véritable révolution dans la restauration mobile clé en main.</p>
+                <div class="split-project__cta fade-in">Voir les modèles →</div>
+            </div>
+        </article>
+
+        <!-- Chaîne de Froid Mobiles -->
+        <article class="split-project split-project--reverse" onclick="location.href='chambre-froide.html'">
+            <div class="split-project__image">
+                <img src="img/tete%20d'affiche%20chambre%20froide.webp" alt="Chaîne de Froid Mobiles" loading="lazy">
+            </div>
+            <div class="split-project__content">
+                <span class="split-project__number">02</span>
+                <span class="split-project__tag text-reveal"><span>Chaîne de Froid</span></span>
+                <h3 class="split-project__name text-reveal"><span>Chambres Froides</span></h3>
+                <p class="split-project__desc fade-in">Réduction drastique des pertes post-récolte pour la souveraineté alimentaire. Des unités frigorifiques mobiles solaires pour conserver la fraîcheur des produits agricoles partout au Sénégal.</p>
+                <div class="split-project__cta fade-in">En savoir plus →</div>
+            </div>
+        </article>
+
+        <!-- Mobile Homes -->
+        <article class="split-project" onclick="location.href='mobile-home.html'">
+            <div class="split-project__image">
+                <img src="img/Mobile%20Home%20fond%20blanc.webp" alt="Mobile Homes" loading="lazy">
+            </div>
+            <div class="split-project__content">
+                <span class="split-project__number">03</span>
+                <span class="split-project__tag text-reveal"><span>Habitat Durable</span></span>
+                <h3 class="split-project__name text-reveal"><span>Mobile Homes</span></h3>
+                <p class="split-project__desc fade-in">L'habitat de demain, mobile et durable. Des résidences modulables fabriquées avec des matériaux locaux, offrant tout le confort moderne avec une empreinte écologique minimale.</p>
+                <div class="split-project__cta fade-in">Découvrir l'habitat →</div>
+            </div>
+        </article>
+    </div>
+</section>
+
+<style>
+/* ─── SPLIT PROJECTS LAYOUT ─── */
+.ufab-projects-split { padding: 120px 0; background: #fff; overflow: hidden; }
+.ufab-projects-split__container { max-width: 1400px; margin: 0 auto; padding: 0 40px; }
+
+.split-project { 
+    display: flex; align-items: center; justify-content: space-between; 
+    margin-bottom: 80px; cursor: pointer; transition: transform 0.4s ease;
+}
+.split-project--reverse { flex-direction: row-reverse; }
+
+.split-project__image { width: 50%; height: 550px; overflow: hidden; border-radius: 4px; background: #f5f5f5; }
+.split-project__image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s ease; }
+
+.split-project__content { width: 42%; position: relative; }
+.split-project__number { font-size: 110px; font-weight: 900; color: #f0f0f0; position: absolute; top: -75px; left: -10px; z-index: -1; line-height: 1; pointer-events: none; }
+.split-project__tag { color: #3D8BFF; font-weight: 900; font-size: 13px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; display: block; }
+.split-project__name { font-size: 48px; font-weight: 800; margin-bottom: 25px; line-height: 1.1; color: #111; }
+.split-project__desc { font-size: 18px; color: #666; line-height: 1.6; margin-bottom: 35px; max-width: 500px; }
+.split-project__cta { font-weight: 800; color: #000; font-size: 15px; border-bottom: 2px solid #3D8BFF; display: inline-block; padding-bottom: 5px; }
+
+.split-project:hover .split-project__image img { transform: scale(1.05); }
+.split-project:hover .split-project__cta { color: #3D8BFF; }
+
+@media (max-width: 991px) {
+    .split-project { flex-direction: column !important; align-items: flex-start; }
+    .split-project__image { width: 100%; height: 350px; margin-bottom: 30px; }
+    .split-project__content { width: 100%; padding-left: 0; }
+    .split-project__number { font-size: 70px; top: -50px; }
+    .split-project__name { font-size: 32px; }
+}
+</style>
+
+
+<!-- ─── ENGAGEMENT ─── -->
+<section class="ufab-engagement">
+    <p class="ufab-engagement__text">
+        <strong>Universal Fab</strong> s'engage à produire localement ce que le Sénégal importe. 
+        De la restauration mobile aux chambres froides, chaque projet renforce la <strong>souveraineté économique</strong> 
+        et crée des emplois durables sur le continent africain.
+    </p>
+    <a href="espace-actionnaire.html" class="ufab-engagement__cta">
+        Espace Actionnaire
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
         </svg>
-        <span>open case study</span>
-    </div>
+    </a>
+</section>
+
+<!-- ─── FOOTER NAVIGATION ─── -->
+<div class="menu">
+    <nav class="navigation">
+        <a href="devis-automatique.html" class="navigation__item work-item" aria-label="Devis" title="Devis">
+            <span class="text">
+                <span>Découvrir</span>
+                <span>Nos</span>
+                <span>Modèles</span>
+            </span>
+            <span class="arrow bottom">
+                <span></span><span></span><span></span><span></span><span></span>
+            </span>
+        </a>
+    </nav>
+</div>
+
+<div class="cursor">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0.542847 7.67929V8.30078H15.4571V7.67929H0.542847Z" fill="white"/>
+        <path d="M7.6893 15.4668H8.31079V0.552504H7.6893V15.4668Z" fill="white"/>
+    </svg>
+    <span>configurer</span>
+</div>
 
 </body>
 </html>

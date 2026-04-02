@@ -1,112 +1,174 @@
-function exportToPDF() {
-    // 1. Identification du modèle
-    const title = document.querySelector('h1')?.innerText || 'Devis Universal Fab';
-    const mainImgSrc = document.querySelector('.img img')?.src || ''; // Capture de l'image du produit
-    
-    // 2. Préparation de la section config
-    const configSection = document.getElementById('rx-config');
-    if (!configSection) return alert("Erreur: Section de configuration non trouvée.");
+/**
+ * devis-export.js - Universal Fab
+ * Ultra-light PDF generation with live checkbox state detection.
+ */
 
-    // Cloner la section pour manipulations PDF
-    const clone = configSection.cloneNode(true);
-    
-    // Nettoyage : retirer les boutons et éléments inutiles
-    clone.querySelectorAll('button').forEach(b => b.remove());
+document.addEventListener('DOMContentLoaded', () => {
+    const exportBtn = document.getElementById('export-pdf-btn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', generatePDF);
+    }
+});
 
-    // Transformation des sélections (OUI / NON) et des types "Base"
-    const realRows = configSection.querySelectorAll('tr');
-    const cloneRows = clone.querySelectorAll('tr');
+async function generatePDF() {
+    console.log("PDF Generation Started...");
     
-    realRows.forEach((row, i) => {
-        const input = row.querySelector('input[type="checkbox"]');
-        const cloneTd = cloneRows[i]?.querySelector('td:last-child');
+    let jsPDF;
+    if (window.jspdf && window.jspdf.jsPDF) {
+        jsPDF = window.jspdf.jsPDF;
+    } else if (window.jsPDF) {
+        jsPDF = window.jsPDF;
+    } else {
+        alert("Erreur: Bibliothèque PDF non chargée.");
+        return;
+    }
+
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const modelImg = document.getElementById('rx-model-img');
+    
+    if (loadingOverlay) loadingOverlay.classList.add('active');
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    try {
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margin = 15;
+        let currentY = 15;
+
+        // 1. Header with Logo & Model Image
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(22);
+        doc.setTextColor(61, 139, 255);
+        doc.text("UNIVERSAL FAB", margin, currentY + 5);
         
-        if (cloneTd) {
-            if (input) {
-                // Remplacer checkbox par texte propre sans crochets
-                cloneTd.innerHTML = input.checked 
-                    ? '<span style="color:#2ecc71; font-weight:bold;">OUI</span>' 
-                    : '<span style="color:#e74c3c;">NON</span>';
-            } else {
-                // Remplacer "Base" par "INCLUS" si c'est un équipement de série
-                const baseSpan = row.querySelector('.rx-base');
-                if (baseSpan) {
-                    cloneTd.innerHTML = '<span style="color:#111; font-weight:bold;">INCLUS</span>';
-                }
+        doc.setFontSize(9);
+        doc.setTextColor(150, 150, 150);
+        doc.text(`Document Généré le ${new Date().toLocaleDateString('fr-FR')}`, pageWidth - margin, currentY + 5, { align: 'right' });
+        
+        currentY += 15;
+
+        // Add Model Image to Header
+        if (modelImg && modelImg.src) {
+            try {
+                const imgData = await getBase64Image(modelImg);
+                const imgW = 40;
+                const imgH = (modelImg.naturalHeight * imgW) / modelImg.naturalWidth;
+                doc.addImage(imgData, 'JPEG', margin, currentY, imgW, imgH);
+                
+                // Model Title next to image
+                const modelName = document.querySelector('.rx-config__title')?.innerText || 'Devis RX';
+                doc.setFontSize(18);
+                doc.setTextColor(33, 33, 33);
+                doc.text(modelName, margin + 45, currentY + 10);
+                
+                doc.setFontSize(10);
+                doc.setFont("helvetica", "normal");
+                doc.setTextColor(100, 100, 100);
+                const series = document.querySelector('.rx-base')?.innerText || 'Configuration Industrielle';
+                doc.text(series, margin + 45, currentY + 18);
+
+                currentY += Math.max(imgH, 20) + 15;
+            } catch (e) {
+                console.warn("Header image skip", e);
+                currentY += 10;
             }
         }
-    });
 
-    // 3. Fenêtre d'impression
-    const win = window.open('', '_blank');
-    if (!win) return alert("Veuillez autoriser les pop-ups pour générer le devis.");
+        // 2. Process Tables with LIVE checkbox states
+        const tables = document.querySelectorAll('.rx-table');
+        const titles = document.querySelectorAll('.rx-table-group__title');
 
-    const pdfHtml = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <title>Devis - ${title}</title>
-            <style>
-                body { font-family: 'Helvetica', 'Arial', sans-serif; padding: 50px; color: #111; background:#fff; line-height: 1.5; }
-                .header { border-bottom: 3px solid #3D8BFF; padding-bottom: 25px; margin-bottom: 35px; display: flex; justify-content: space-between; align-items: flex-end; }
-                .header-left h1 { font-size: 32px; margin: 0; text-transform: uppercase; letter-spacing: 2px; }
-                .header-left p { margin: 8px 0 0 0; color: #3D8BFF; font-weight: bold; font-size: 16px; }
-                .hero-img { width: 100%; height: 300px; object-fit: cover; border-radius: 12px; margin-bottom: 40px; border: 1px solid #eee; }
-                
-                h2 { color: #3D8BFF; margin-top: 40px; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
-                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                th { text-align: left; background: #fafafa; padding: 12px 15px; font-size: 11px; text-transform: uppercase; color: #888; border-bottom: 1px solid #eee; }
-                td { padding: 18px 15px; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
-                
-                .footer { margin-top: 80px; font-size: 11px; color: #aaa; text-align: center; border-top: 1px solid #f0f0f0; padding-top: 30px; letter-spacing: 0.5px; }
-                
-                @media print { 
-                    body { padding: 20px; } 
-                    .no-print { display: none; }
-                }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <div class="header-left">
-                    <h1>UNIVERSAL FAB</h1>
-                    <p>DEVIS TECHNIQUE - ${title}</p>
-                </div>
-                <div style="text-align:right; font-size: 12px; color: #999;">
-                    Document généré le ${new Date().toLocaleDateString('fr-FR')}
-                </div>
-            </div>
+        tables.forEach((table, index) => {
+            const tableTitle = titles[index]?.innerText || 'Spécifications';
+            
+            // Check for page break
+            if (currentY > 250) {
+                doc.addPage();
+                currentY = 20;
+            }
 
-            ${mainImgSrc ? `<img src="${mainImgSrc}" class="hero-img" alt="Aperçu modèle">` : ''}
+            doc.setFontSize(11);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(60, 60, 60);
+            doc.text(tableTitle.toUpperCase(), margin, currentY);
 
-            <p style="font-size: 14px; max-width: 600px; margin-bottom: 30px;">
-                Ce document récapitule la configuration et les équipements sélectionnés pour votre restaurant mobile Universal Fab.
-            </p>
+            // Extract rows and manual check for inputs
+            const rows = [];
+            const trs = table.querySelectorAll('tr');
+            trs.forEach(tr => {
+                const rowData = [];
+                const tds = tr.querySelectorAll('td, th');
+                tds.forEach(td => {
+                    // Check if cell contains a checkbox or radio
+                    const input = td.querySelector('input[type="checkbox"], input[type="radio"]');
+                    if (input) {
+                        rowData.push(input.checked ? "[X] SÉLECTIONNÉ" : "[ ] NON INCLUS");
+                    } else {
+                        rowData.push(td.innerText.trim());
+                    }
+                });
+                if (rowData.length > 0) rows.push(rowData);
+            });
 
-            <div class="pdf-content">
-                ${clone.innerHTML}
-            </div>
+            doc.autoTable({
+                head: [rows[0]], // Assume first row is header
+                body: rows.slice(1),
+                startY: currentY + 3,
+                margin: { left: margin, right: margin },
+                theme: 'striped',
+                headStyles: { fillColor: [61, 139, 255], fontSize: 9 },
+                styles: { fontSize: 8, cellPadding: 3 },
+                alternateRowStyles: { fillColor: [248, 250, 252] }
+            });
 
-            <div class="footer">
-                © ${new Date().getFullYear()} UNIVERSAL FAB. Ce devis est fourni à titre indicatif et ne vaut pas bon de commande final. <br>
-                Contactez notre département commercial pour une offre ferme et définitive.
-            </div>
-        </body>
-        </html>
-    `;
+            currentY = doc.lastAutoTable.finalY + 12;
+        });
 
-    win.document.write(pdfHtml);
-    win.document.close();
-    
-    // Fix du freeze barbalogo/gsap : Focus sur la nouvelle fenêtre avant print
-    setTimeout(() => {
-        win.focus();
-        win.print();
-        // Optionnel : fermer automatiquement après impression (certains navigateurs bloquent)
-        // win.close(); 
-    }, 800);
+        // 3. Footer
+        const totalPages = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(170, 170, 170);
+            doc.text(`UNIVERSAL FAB INDUSTRIAL CONCEPT — PAGE ${i} / ${totalPages}`, pageWidth / 2, 285, { align: 'center' });
+        }
+
+        // 4. Robust Save for Chrome/Edge
+        const modelName = document.querySelector('.rx-config__title')?.innerText || 'Devis';
+        const safeName = modelName.trim().replace(/[^a-zA-Z0-9]/g, '_');
+        const filename = `Universal_Fab_Devis_${safeName}.pdf`;
+        
+        doc.save(filename);
+        console.log("PDF Saved successfully:", filename);
+
+    } catch (error) {
+        console.error('PDF Error:', error);
+        alert('Erreur lors de la génération du PDF.');
+    } finally {
+        if (loadingOverlay) loadingOverlay.classList.remove('active');
+    }
 }
 
-// Global scope
-window.exportToPDF = exportToPDF;
+/**
+ * Image helper with better error handling & quality
+ */
+function getBase64Image(img) {
+    return new Promise((resolve, reject) => {
+        if (!img.src) return reject("No src");
+        
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const scale = 0.6;
+        canvas.width = img.naturalWidth * scale;
+        canvas.height = img.naturalHeight * scale;
+        
+        const tempImg = new Image();
+        tempImg.crossOrigin = "anonymous";
+        tempImg.onload = () => {
+            ctx.drawImage(tempImg, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL("image/jpeg", 0.8));
+        };
+        tempImg.onerror = () => reject("Load fail");
+        tempImg.src = img.src;
+    });
+}
