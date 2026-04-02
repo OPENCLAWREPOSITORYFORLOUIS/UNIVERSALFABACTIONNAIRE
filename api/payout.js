@@ -52,26 +52,16 @@ export default async function handler(req, res) {
     if (profileErr || !profile) return res.status(404).json({ error: 'Profil utilisateur non trouvé.' });
     if (profile.dividends_balance < amount) return res.status(400).json({ error: 'Solde de dividendes insuffisant.' });
 
-    // In test mode, simulate success if needed or use real test keys
-    if (MODE === 'test' && !API_KEY.startsWith('prod_')) {
-      console.log('[TEST MODE] Simulating PayTech payout:', { userId, amount, phoneNumber, serviceName });
-      
-      await supabase.from('payouts').insert({
-        user_id: userId, amount, phone_number: phoneNumber, operator: phoneOperator,
-        status: 'pending', naboopay_payout_id: `test_pyt_${Date.now()}`, created_at: new Date().toISOString()
-      });
-
-      return res.status(200).json({ success: true, test_mode: true, message: `[TEST] Retrait simulé de ${amount} FCFA.` });
-    }
-
-    // 2. LIVE/PROD — PayTech Transfer API
+    // PayTech Transfer API (Real Transaction)
     const transferData = {
       amount: parseInt(amount),
       destination_number: phoneNumber.replace(/\s/g, ''),
       service: serviceName,
-      callback_url: `${APP_URL}/api/paytech-ipn`, // Reuse IPN or separate
+      callback_url: `${APP_URL}/api/paytech-ipn`,
       external_id: `PYT-OUT-${Date.now()}`
     };
+
+    console.log('Initiating PayTech Transfer (PROD):', transferData);
 
     const response = await fetch('https://paytech.sn/api/transfer/transferFund', {
       method: 'POST',
