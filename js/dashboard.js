@@ -373,3 +373,13 @@ function toast(msg, type = 'success') {
   document.getElementById('toast').appendChild(el);
   setTimeout(() => el.remove(), 4000);
 }
+
+// Map functions to window for Vite inline onclick handler compatibility
+window.toggleAuth = toggleAuth;
+window.doLogin = doLogin;
+window.doRegister = doRegister;
+window.doLogout = doLogout;
+window.doInvest = doInvest;
+window.selectOp = selectOp;
+window.doWithdraw = doWithdraw;
+window.updateProfile = updateProfile;
