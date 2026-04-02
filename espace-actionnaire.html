@@ -9,6 +9,7 @@
 <link href="css/dashboard.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <script src="js/dashboard.js" defer></script>
+<script src="js/shared-header.js" defer></script>
 </head>
 <body>
 
@@ -63,9 +64,9 @@
 
   <!-- ─── DASHBOARD ─── -->
   <div id="dashboard">
-    <nav class="nav">
+    <nav class="nav header">
       <a href="index.html" class="nav-logo" style="text-decoration:none; color:inherit;">UNIVERSAL <span>FAB</span></a>
-      <div class="nav-right">
+      <div class="nav-right header__menu">
         <span class="nav-user" id="nav-email"></span>
         <button class="btn btn-ghost btn-sm" onclick="doLogout()">Déconnexion</button>
       </div>

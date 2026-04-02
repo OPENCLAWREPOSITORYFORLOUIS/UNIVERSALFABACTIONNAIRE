@@ -11,7 +11,7 @@ function updateHeader() {
     
     // Check current page type
     const isHome = path === '' || path === '/' || path.includes('index.html');
-    const isProjectDetail = path.includes('flotte-nationale.html') || path.includes('chambre-froide.html') || path.includes('mobile-home.html');
+    const isProjectDetail = path.includes('devis-automatique.html') || path.includes('chambre-froide.html') || path.includes('mobile-home.html');
     const isDevisSection = path.includes('devis-automatique.html');
     const isDevisRX = path.includes('devis-rx');
 
